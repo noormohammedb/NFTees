@@ -23,7 +23,7 @@ const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('b
     }
   })
 import { marketplaceAddress } from "../../../blockchain/config";
-import NFTMarketplace from "../../../blockchain/artifacts/contracts/NFTMarketplace.sol/NFTMarketplace.json";
+import NFTMarketplace from "../../../blockchain/artifacts/contracts/nftMarketplace.sol/NFTMarketplace.json";
 
 function CreateNFT () {
     const [fileUrl, setFileUrl] = useState(null);

@@ -10,7 +10,7 @@ import {
 
 import NFTMarketplace from '../../../blockchain/artifacts/contracts/nftMarketplace.sol/NFTMarketplace.json'
 
-export default function MyAssets() {
+export default function userAssets() {
   const [nfts, setNfts] = useState([])
   const [loadingState, setLoadingState] = useState('not-loaded')
   const router = Router()

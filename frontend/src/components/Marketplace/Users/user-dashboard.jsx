@@ -9,7 +9,7 @@ import axios from "axios";
 import { marketplaceAddress } from "../../../blockchain/config";
 import NFTMarketplace from "../../../blockchain/artifacts/contracts/NFTMarketplace.sol/NFTMarketplace.json";
 
-function home() {
+function home () {
 	const [nfts, setNfts] = useState([]);
 	const [clickeddata, setClickedData] = useState(null);
 	useEffect(() => {
@@ -39,6 +39,8 @@ function home() {
 					image: meta.data.image,
 					name: meta.data.name,
 					description: meta.data.description,
+					nftstorage: meta.data.nftstorage,
+					nftstoragedata: meta.data.nftstoragedata,
 					wallet_address: meta.data.wallet_address,
 				};
 				return item;

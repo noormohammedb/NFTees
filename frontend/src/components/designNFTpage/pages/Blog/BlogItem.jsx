@@ -1,7 +1,13 @@
 import React from "react";
 
+function makeGatewayURL(ipfsURI) {
+  return ipfsURI.replace(/^ipfs:\/\//, "https://nftstorage.link/ipfs/");
+}
+
 const BlogItem = (props) => {
-	const { image, title, description, type, price } = props.blog;
+	const { image, title, description, nftstorage, type, price } = props.blog;
+	const [nftstoreimage, setNftstoreimage] = useState("");
+	setNftstoreimage(makeGatewayURL(nftstorage.image));
 	return (
 		<div className="w-full lg:w-1/2">
 			<div className="my-4 md:mx-4 shadow p-6 rounded-md bg-white group hover:shadow-md">
@@ -28,7 +34,9 @@ const BlogItem = (props) => {
 						{title}
 					</a>
 				</h3>
-        <p className="text-gray-400">{description}</p>
+				<p className="text-gray-400">{description}</p>
+				<h1>IPFS</h1>
+				<p>{nftstoreimage}</p>
         <div className="flex justify-between" >
           <p>{price} ETH</p>
           {/* <button onClick={() => props.buyNft(props.blog)}>Buy</button> */}

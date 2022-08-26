@@ -24,7 +24,7 @@ const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('b
     }
   })
 import { marketplaceAddress } from "../../../blockchain/config";
-import NFTMarketplace from "../../../blockchain/artifacts/contracts/nftMarketplace.sol/NFTMarketplace.json";
+import NFTMarketplace from "../../../blockchain/artifacts/contracts/NFTMarketplace.sol/NFTMarketplace.json";
 
 function makeGatewayURL(ipfsURI) {
   return ipfsURI.replace(/^ipfs:\/\//, "https://nftstorage.link/ipfs/");

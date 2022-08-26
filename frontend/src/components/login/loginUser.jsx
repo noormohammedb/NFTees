@@ -39,7 +39,7 @@ function LoginUser() {
 			setAccountBalance(bal);
 			setIsConnected(true);
 			setTimeout(() => {
-				window.location.href = "/dashboard";
+				window.location.href = "/userdashboard";
 			}
 				, 2000);
 			// CreateItem();

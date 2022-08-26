@@ -7,7 +7,7 @@ import Footer from "./../../designNFTpage/sections/Footer/Footer.jsx";
 import { ethers } from "ethers";
 import axios from "axios";
 import { marketplaceAddress } from "../../../blockchain/config";
-import NFTMarketplace from "../../../blockchain/artifacts/contracts/NFTMarketplace.sol/NFTMarketplace.json";
+import NFTMarketplace from "../../../blockchain/artifacts/contracts/nftMarketplace.sol/NFTMarketplace.json";
 
 function home () {
 	const [nfts, setNfts] = useState([]);

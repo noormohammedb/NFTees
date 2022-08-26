@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
-import { BrowserRouter as Router } from "react-router-dom";
+import {  useHistory } from 'react-router-dom'
+import queryString from "query-string"
 import axios from 'axios'
 import Web3Modal from 'web3modal'
 
@@ -8,12 +9,15 @@ import {
   marketplaceAddress
 } from '../../../blockchain/config'
 
-import NFTMarketplace from '../../../blockchain/artifacts/contracts/NFTMarketplace.sol/NFTMarketplace.json'
+import NFTMarketplace from '../../../blockchain/artifacts/contracts/nftMarketplace.sol/NFTMarketplace.json'
 
 export default function ResellNFT() {
   const [formInput, updateFormInput] = useState({ price: '', image: '' })
-  const router = Router()
-  const { id, tokenURI } = router.query
+  const queryParams = queryString.parse(window.location.search)
+  const {id} = queryParams.id
+  const {tokenURI} = queryParams.tokenURI
+  console.log(id, tokenURI)
+  const router =  useHistory();
   const { image, price } = formInput
 
   useEffect(() => {
@@ -54,7 +58,7 @@ export default function ResellNFT() {
         />
         {
           image && (
-            <img className="rounded mt-4" width="350" src={image} alt="nft" />
+            <img className="rounded mt-4" width="350" src={image} />
           )
         }
         <button onClick={listNFTForSale} className="font-bold mt-4 bg-pink-500 text-white rounded p-4 shadow-lg">

@@ -14,6 +14,15 @@ module.exports = {
     hardhat: {
       chainId: 31337,
     },
-    // polygon_mumbai: {},
+    polygon_mumbai: {},
   },
+  solidity: {
+    version: "0.8.4",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200
+      }
+    }
+  }
 };

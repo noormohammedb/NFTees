@@ -56,13 +56,21 @@ const socials = [
   },
 ];
 
+function makeGatewayURL(ipfsURI) {
+  return ipfsURI.replace(/^ipfs:\/\//, "https://nftstorage.link/ipfs/");
+}
+
 const Sidebar = (props) => {
   const [amt, setAmt] = useState(1);
   const [account, setAccount] = useState("");
   const [value, setValue] = React.useState(0);
   const [txs, setTxs] = useState([]);
   const ethervalue = [];
-  const { name, description, image, wallet_address, email_id } = props.clickeddata;
+  // const [nftstoreimage, setNftstoreimage] = useState("");
+
+  const { name, description, image, nftstorage,nftstoragedata, wallet_address, email_id } = props.clickeddata;
+  console.log(nftstoragedata.image);
+	makeGatewayURL(nftstoragedata.image);
 
   const startPayment = async ({ setTxs, ether, to_addr }) => {
     try {
@@ -132,6 +140,15 @@ const Sidebar = (props) => {
         </h3>
         <p className="text-gray-400 text font-light leading-relaxed">
           {description}
+        </p>
+      </div>
+      <div className="text-start pt-4">
+        <h3 className="text-md mb-2 uppercase font-medium text-gray-800">
+          Nft storage uri
+        </h3>
+        <p className="text-gray-400 text font-light leading-relaxed">
+          {/* {nftstoreimage} */}
+          {nftstoragedata.image.replace(/^ipfs:\/\//, "https://nftstorage.link/ipfs/")}
         </p>
       </div>
       <ToastContainer />

@@ -24,10 +24,15 @@ const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('b
     }
   })
 import { marketplaceAddress } from "../../../blockchain/config";
-import NFTMarketplace from "../../../blockchain/artifacts/contracts/nftMarketplace.sol/NFTMarketplace.json";
+import NFTMarketplace from "../../../blockchain/artifacts/contracts/NFTMarketplace.sol/NFTMarketplace.json";
+
+function makeGatewayURL(ipfsURI) {
+  return ipfsURI.replace(/^ipfs:\/\//, "https://nftstorage.link/ipfs/");
+}
 
 function CreateNFT () {
-    const [fileUrl, setFileUrl] = useState(null);
+	const [fileUrl, setFileUrl] = useState(null);
+	const [files, setFiles] = useState([]);
 	const [formInput, updateFormInput] = useState({
 		price: "",
 		name: "",
@@ -36,6 +41,7 @@ function CreateNFT () {
     	const [nfttype, setNfttype] = useState(0);
     async function onChange(e) {
 		const file = e.target.files[0];
+		setFiles(file);
 		try {
 			const added = await client.add(file, {
 				progress: (prog) => console.log(`received: ${prog}`),
@@ -61,9 +67,9 @@ function CreateNFT () {
 		const metadata = await clientnft.store({
 			name,
 			description,
-			image: new File([fileUrl], name, { type: "image/jpg" }),
+			image: files,
 		});
-		console.log(metadata.url);
+		console.log(makeGatewayURL(metadata.data.image.href));
 
 		/* upload to IPFS */
 		
@@ -73,6 +79,8 @@ function CreateNFT () {
 				description,
 				image: fileUrl,
 				type: nfttype,
+				nftstorageURI: metadata.url,
+				nftstoragedata: metadata.data,
 			});
 			const added = await client.add(data);
 			const url = `https://nftees.infura-ipfs.io/ipfs/${added.path}`;

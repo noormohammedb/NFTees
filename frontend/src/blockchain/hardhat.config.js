@@ -1,24 +1,19 @@
-require("@nomiclabs/hardhat-waffle")
+/**
+* @type import('hardhat/config').HardhatUserConfig
+*/
+
+require('dotenv').config();
+require("@nomiclabs/hardhat-ethers");
+
+const { API_URL, PRIVATE_KEY } = process.env;
 
 module.exports = {
-  defaultNetwork: "hardhat",
+  solidity: "0.8.4",
+  defaultNetwork: "polygon_mumbai",
   networks: {
     hardhat: {
-      chainId: 1337
+      chainId: 31337,
     },
-//  unused configuration commented out for now
-//  mumbai: {
-//    url: "https://rpc-mumbai.maticvigil.com",
-//    accounts: [process.env.privateKey]
-//  }
+    polygon_mumbai: {},
   },
-  solidity: {
-    version: "0.8.4",
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200
-      }
-    }
-  }
-}
+};

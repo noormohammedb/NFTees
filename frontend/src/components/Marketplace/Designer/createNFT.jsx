@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ethers } from "ethers";
 import { create as ipfsClient } from "ipfs-http-client";
 import Web3Modal from "web3modal";
+import { NFTStorage, File, Blob } from "nft.storage";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -45,10 +46,26 @@ function CreateNFT () {
 			console.log("Error uploading file: ", error);
 		}
 	}
-	async function uploadToIPFS() {
+	async function uploadToIPFS () {
+		
 		const { name, description, price } = formInput;
 		if (!name || !description || !price || !fileUrl) return;
-		/* first, upload to IPFS */
+
+		/* upload to NFT.storage */
+
+		const clientnft = new NFTStorage({
+      	token:
+        	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweERCNWY1ODg0QjVENjY2Mjk4QzgwZGNmNEEzMDUxMTcyQzgyZGM3OEMiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2MTQ1Mzk4NjE2NiwibmFtZSI6InRyYWlsMSJ9.deWJ3U60Ydi6hh-9XW2EVk9xlz7VKm03fxvrYqcovoQ",
+		});
+		
+		const metadata = await clientnft.store({
+			name,
+			description,
+			image: new File([fileUrl], name, { type: "image/jpg" }),
+		});
+		console.log(metadata.url);
+
+		/* upload to IPFS */
 		
 		try {
 			const data = JSON.stringify({
@@ -59,6 +76,7 @@ function CreateNFT () {
 			});
 			const added = await client.add(data);
 			const url = `https://nftees.infura-ipfs.io/ipfs/${added.path}`;
+			console.log(url);
 			/* after file is uploaded to IPFS, return the URL to use it in the transaction */
 			return url;
 		} catch (error) {

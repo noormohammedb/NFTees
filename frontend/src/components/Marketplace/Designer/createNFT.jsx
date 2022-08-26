@@ -1,9 +1,9 @@
 import React from 'react'
 
-function createNFT() {
+function CreateNFT() {
   return (
     <div>createNFT</div>
   )
 }
 
-export default createNFT
+export default CreateNFT

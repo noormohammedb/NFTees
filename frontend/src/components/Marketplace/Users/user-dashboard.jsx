@@ -1,67 +1,105 @@
-import { ethers } from 'ethers'
-import { useEffect, useState } from 'react'
-import axios from 'axios'
-import Web3Modal from 'web3modal'
+import React, { useEffect, useState } from "react";
 
-import {
-  marketplaceAddress
-} from '../../../blockchain/config'
+import ProfileCover from "./../../designNFTpage/sections/ProfileCover/ProfileCover.jsx";
+import Sidebar from "./../../designNFTpage/sections/Sidebar/Sidebar.jsx";
+import Navbar from "./../../designNFTpage/sections/Navbar/Navbar.jsx";
+import Footer from "./../../designNFTpage/sections/Footer/Footer.jsx";
+import { ethers } from "ethers";
+import axios from "axios";
+import { marketplaceAddress } from "../../../blockchain/config";
+import NFTMarketplace from "../../../blockchain/artifacts/contracts/NFTMarketplace.sol/NFTMarketplace.json";
 
-import NFTMarketplace from '../../../blockchain/artifacts/contracts/nftMarketplace.sol/NFTMarketplace.json'
+function home() {
+	const [nfts, setNfts] = useState([]);
+	const [clickeddata, setClickedData] = useState(null);
+	useEffect(() => {
+		loadNFTs();
+	}, []);
+	async function loadNFTs() {
+		const provider = new ethers.providers.JsonRpcProvider();
+		const contract = new ethers.Contract(
+			marketplaceAddress,
+			NFTMarketplace.abi,
+			provider
+		);
+		console.log(contract);
+		const data = await contract.fetchMarketItems();
 
-export default function UserDashboard() {
-  const [nfts, setNfts] = useState([])
-  const [loadingState, setLoadingState] = useState('not-loaded')
-  useEffect(() => {
-    loadNFTs()
-  }, [])
-  async function loadNFTs() {
-    const web3Modal = new Web3Modal({
-      network: 'mainnet',
-      cacheProvider: true,
-    })
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
-
-    const contract = new ethers.Contract(marketplaceAddress, NFTMarketplace.abi, signer)
-    const data = await contract.fetchItemsListed()
-
-    const items = await Promise.all(data.map(async i => {
-      const tokenUri = await contract.tokenURI(i.tokenId)
-      const meta = await axios.get(tokenUri)
-      let price = ethers.utils.formatUnits(i.price.toString(), 'ether')
-      let item = {
-        price,
-        tokenId: i.tokenId.toNumber(),
-        seller: i.seller,
-        owner: i.owner,
-        image: meta.data.image,
-      }
-      return item
-    }))
-
-    setNfts(items)
-    setLoadingState('loaded') 
-  }
-  if (loadingState === 'loaded' && !nfts.length) return (<h1 className="py-10 px-20 text-3xl">No NFTs listed</h1>)
-  return (
-    <div>
-      <div className="p-4">
-        <h2 className="text-2xl py-2">Items Listed</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
-          {
-            nfts.map((nft, i) => (
-              <div key={i} className="border shadow rounded-xl overflow-hidden">
-                <img src={nft.image} className="rounded" alt="nft" />
-                <div className="p-4 bg-black">
-                  <p className="text-2xl font-bold text-white">Price - {nft.price} Eth</p>
-                </div>
-              </div>
-            ))
-          }
-        </div>
-      </div>
-    </div>
-  )
+		const items = await Promise.all(
+			data.map(async (i) => {
+				const tokenUri = await contract.tokenURI(i.tokenId);
+				const meta = await axios.get(tokenUri);
+				console.log(meta.data);
+				let price = ethers.utils.formatUnits(i.price.toString(), "ether");
+				let item = {
+					price,
+					tokenId: i.tokenId.toNumber(),
+					seller: i.seller,
+					owner: i.owner,
+					image: meta.data.image,
+					name: meta.data.name,
+					description: meta.data.description,
+					wallet_address: meta.data.wallet_address,
+				};
+				return item;
+			})
+		);
+		setNfts(items);
+	}
+	return (
+		<div className="">
+			{clickeddata === null ? (
+				<div>
+					<div>
+						<h1 className="text-2xl font-bold mx-10 mt-5">Designs</h1>
+						<section className="pb-10">
+							<div className="grid lg:grid-cols-3 grid-cols-1 md:px-4">
+								{nfts.map((nft, i) => (
+									<div className="w-full ">
+										<div className="my-4 md:mx-4 shadow p-6 rounded-md bg-white group hover:shadow-md">
+											<div className="relative mb-6 w-full h-56 bg-purple-200 rounded-md overflow-hidden">
+												<img
+													src={nft.image}
+													alt="creatorImage"
+													className="w-full h-full object-cover object-center transform group-hover:scale-125 group-hover:rotate-6 transition duration-200"
+												/>
+											</div>
+											<h3>
+												<a
+													onClick={() => setClickedData(nft)}
+													className="block text-lg font-medium text-gray-800 hover:text-purple-600 mb-2"
+												>
+													{nft.name}
+												</a>
+											</h3>
+											<p className="text-gray-400">{nft.description}</p>
+										</div>
+									</div>
+								))}
+							</div>
+						</section>
+					</div>
+				</div>
+			) : (
+				<>
+				<main className="min-h-screen relative bg-gray-50 pb-10">
+					<ProfileCover />
+					<div className="container px-4">
+						<div className="flex flex-wrap px-4">
+							<div className="w-full lg:w-1/3 ">
+								<Sidebar clickeddata={clickeddata} />
+							</div>
+							<div className="w-full lg:w-2/3 ">
+								<Navbar wallet_address={clickeddata.wallet_address} />
+							</div>
+						</div>
+					</div>
+					<Footer />
+				</main>
+				</>
+			)}
+		</div>
+	);
 }
+
+export default home;

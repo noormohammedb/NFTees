@@ -19,8 +19,8 @@ contract NFTEE is ERC721URIStorage {
         require(msg.sender == admin);
         _;
     }
-    uint256 listing_cost = 20;
-    uint256 default_fractions = 10_000;
+    uint256 default_listing_cost = 20;
+    uint256 default_fraction_count = 10_000;
 
     struct Pair {
         uint256 vote_count;
@@ -31,32 +31,54 @@ contract NFTEE is ERC721URIStorage {
         uint256 token_liq;
     }
 
-    uint256[] roundNumber;
-
     // Round number => list of candidate tokenIds
     mapping(uint256 => uint256[]) candidates;
     // Round number => tokenId => Whether it is listed in the protocol
-    mapping(uint256 => mapping(uint256 => bool)) isCandidate;
+    mapping(uint256 => mapping(uint256 => bool)) is_candidate;
     // NFT tokenId => NFTLiquidityPool
     mapping(uint256 => NFTLiquidityPool) nft_liq_pools;
 
     // round_no => nft id => voter address => pair { vote and tokens }
     mapping(uint256 => mapping(uint256 => mapping(address => Pair))) round_info;
 
-    function mint(uint256 creater_percent) public returns (uint256) {
+    // function mint(uint256 creater_percent) public returns (uint256) {
+    //     _tokenIds.increment();
+    //     uint256 newItemId = _tokenIds.current();
+    //     _mint(msg.sender, newItemId);
+    //     uint256 creater_fraction = (default_fractions * creater_percent) / 100;
+
+    //     nft_liq_pools[newItemId].nft_liq = default_fractions - creater_fraction;
+    //     nft_liq_pools[newItemId].token_liq = 20;
+    //     return newItemId;
+    // }
+    uint256 roundNumber;
+
+    function mint(string calldata _tokenURI) public returns (uint256) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         _mint(msg.sender, newItemId);
-        uint256 creater_fraction = (default_fractions * creater_percent) / 100;
-
-        nft_liq_pools[newItemId].nft_liq = default_fractions - creater_fraction;
-        nft_liq_pools[newItemId].token_liq = 20;
+        _setTokenURI(newItemId, _tokenURI);
         return newItemId;
+    }
+
+    function list(uint256 tokenId, uint256 authorCutPercent) public {
+        require(authorCutPercent <= 100, "Cannot claim more than 100%");
+        require(msg.sender == ownerOf(tokenId), "Only owner can list an asset");
+        // Verify balance of lister
+        // require()
+        // Create liquidity pool and push it to current round
+        uint256 authorCut = (default_fraction_count * authorCutPercent) / 100;
+        nft_liq_pools[tokenId] = NFTLiquidityPool({
+            nft_liq: default_fraction_count - authorCut,
+            token_liq: default_listing_cost
+        });
+        candidates[roundNumber].push(tokenId);
+        is_candidate[roundNumber][tokenId] = true;
     }
 
     // ----------------------------------------------------
     function vote(uint256 nftId, uint256 token) public {
-        uint256 round_no = current_round();
+        uint256 round_no = roundNumber;
 
         uint256 current_nfg_liq = round_info[round_no][nftId][msg.sender]
             .vote_count;
@@ -80,14 +102,7 @@ contract NFTEE is ERC721URIStorage {
         // round_info[round_no][msg.sender][nftId].no_of_tokens += token;
     }
 
-    function update_round() public {
-        // update the round number
-        // round_numbers[0] = round_numbers[round_numbers.length - 1] + 1;
-        // round_numbers.push(round_numbers[round_numbers.length - 1] + 1);
-        roundNumber.push(roundNumber[roundNumber.length - 1] + 1);
-    }
-
-    function current_round() public view returns (uint256) {
-        return roundNumber[roundNumber.length - 1];
+    function update_round() private _onlyAdmin {
+        roundNumber++;
     }
 }

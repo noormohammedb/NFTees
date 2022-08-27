@@ -106,14 +106,22 @@ const CreateNewContent = () => {
             NFTEE.abi,
             signer
         );
-        let listingPrice = await contract.getListingPrice();
+        let listingPrice = await contract.default_listing_cost();
         listingPrice = listingPrice.toString();
-        let transaction = await contract.createToken(url, price, {
-            value: listingPrice,
+        let transaction = await contract.mint(url, {
+          value: listingPrice,
         });
-        await transaction.wait();
+        const res = await transaction.wait();
+	    console.log("res", res.events[0].args.tokenId.toNumber());
 
         console.log("Transaction complete!");
+        let transaction2 = await contract.list(
+        res.events[0].args.tokenId.toNumber(),
+          5 //create a state for this
+        );
+        // const res2 = await transaction2.wait();
+        console.log("res2");
+        console.log("Transaction2 complete!");
     }
     // useEffect(() => {
     //     $(selectCata.current).niceSelect();

@@ -29,31 +29,35 @@ const LiveBidding = () => {
         /* create a generic provider and query for unsold market items */
         const provider = new ethers.providers.JsonRpcProvider()
         const contract = new ethers.Contract(nftAddress, NFTEE.abi, provider)
-        const data = await contract.fetchMarketItems()
+		const round = await contract.roundNumber();
+		console.log(round.toNumber());
+		const data = await contract.arrayOfRound(round.toNumber());
 
         /*
         *  map over items returned from smart contract and format 
         *  them as well as fetch their token metadata
         */
-        const items = await Promise.all(data.map(async i => {
-            const tokenUri = await contract.tokenURI(i.tokenId)
+        const items = await Promise.all(data.map(async candidate => {
+            const tokenUri = await contract.tokenURI(candidate)
             const meta = await axios.get(tokenUri)
-            let price = ethers.utils.formatUnits(i.price.toString(), 'ether')
+            // let price = ethers.utils.formatUnits(i.price.toString(), 'ether')
             let item = {
-                price,
-                tokenId: i.tokenId.toNumber(),
-                seller: i.seller,
-                owner: i.owner,
-                image: meta.data.image,
-                name: meta.data.name,
-                description: meta.data.description,
-            }
+              // price,
+              tokenId: candidate.toNumber(),
+              owner: await contract.ownerOf(candidate),
+              image: meta.data.image,
+              name: meta.data.name,
+              description: meta.data.description,
+              nftstorage: meta.data.nftstorage,
+			  nftstoragedata: meta.data.nftstoragedata,
+            };
             return item
         }))
         console.log(items)
         setNfts(items)
         setLoadingState('loaded')
     }
+    
     async function buyNft(nft) {
         /* needs the user to sign the transaction, so will use Web3Provider and sign it */
         const web3Modal = new Web3Modal()
@@ -102,97 +106,105 @@ const LiveBidding = () => {
     }
 
     const LiveAuctionsCards = nfts.map((elem, index) => (
-        <div key={index} className="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div className="nft-card card shadow-sm">
-                <div className="card-body">
-                    <div className="img-wrap">
-                        {/* Image */}
-                        <img src={elem.image} alt={elem.name} />
+      <div key={index} className="col-12 col-sm-6 col-lg-4 col-xl-3">
+        <div className="nft-card card shadow-sm">
+          <div className="card-body">
+            <div className="img-wrap">
+              {/* Image */}
+              <img src={elem.image} alt={elem.name} />
 
-                        {/* Badge */}
-                        <div className={`badge bg-dark position-absolute section-`} >
-                            {/* <img src={`${process.env.PUBLIC_URL}/${elem.badgeInfo[0].icon}`} alt={elem.badgeInfo[0].text} /> */}
-                            New Bid
-                        </div>
+              {/* Badge */}
+              <div className={`badge bg-dark position-absolute section-`}>
+                {/* <img src={`${process.env.PUBLIC_URL}/${elem.badgeInfo[0].icon}`} alt={elem.badgeInfo[0].text} /> */}
+                New Bid
+              </div>
 
-
-
-                        {/* Bid End */}
-                        {/* <Countdown date={elem.bidEndsTime} intervalDelay={0} renderer={clockTime} /> */}
-                        <Countdown date="April 24, 2023 00:00:00" intervalDelay={0} renderer={clockTime} />
-                    </div>
-
-                    {/* Others Info */}
-                    <div className="row gx-2 align-items-center mt-3">
-                        <div className="col-8">
-                            <span className="d-block fz-12">
-                                <i className={`bi bi-bag me-1`} />
-                                3 stocks available
-                            </span>
-                        </div>
-                        <div className="col-4 text-end">
-                            <button
-                                className="wishlist-btn"
-                                type="button"
-                            >
-                                <i className="bi" />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Meta Info */}
-                    <div className="row gx-2 align-items-center mt-2">
-                        <div className="col-8">
-                            <div className="name-info d-flex align-items-center">
-                                <div className="author-img position-relative">
-                                    <img className="shadow" src="img/bg-img/u4.jpg" alt={elem.seller} />
-                                    <i className={`bi bi-check position-absolute bg-success true`} />
-                                </div>
-
-                                <div className="name-author">
-                                    <OverlayTrigger placement="top"
-                                        delay={{ show: 250, hide: 400 }}
-                                        overlay={
-                                            <Tooltip id={`liveAuctionNFT${elem.tokenId}`}>
-                                                {elem.name}
-                                            </Tooltip>
-                                        }
-                                    >
-                                        <Link className="name d-block hover-primary text-truncate" to={`/live-bid/${elem.tokenId}`} >
-                                            {elem.name}
-                                        </Link>
-                                    </OverlayTrigger>
-                                 <Link
-                                        className="author d-block fz-12 hover-primary text-truncate"
-                                        to={`/author/${elem.seller}`}
-                                    >
-                                        ...{elem.seller.substring(30,42)}
-                                    </Link> 
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="col-4">
-                            <div className="price text-end">
-                                <span className="fz-12 d-block">Current Bid</span>
-                                <h6 className="mb-0">{elem.price}</h6>
-                            </div>
-                        </div>
-
-                        <div className="col-12">
-                            <Link
-                                className={`btn btn-primary rounded-pill btn-sm mt-3 w-100`}
-                                to={`/live-bid/${elem.tokenId}`}
-                            >
-                                {/* <i className={`bi ${elem.buttonInfo[0].icon} me-1`} ></i> */}
-                                Place Bid
-                            </Link>
-                        </div>
-                    </div>
-                </div>
+              {/* Bid End */}
+              {/* <Countdown date={elem.bidEndsTime} intervalDelay={0} renderer={clockTime} /> */}
+              <Countdown
+                date="April 24, 2023 00:00:00"
+                intervalDelay={0}
+                renderer={clockTime}
+              />
             </div>
+
+            {/* Others Info */}
+            <div className="row gx-2 align-items-center mt-3">
+              <div className="col-8">
+                <span className="d-block fz-12">
+                  <i className={`bi bi-bag me-1`} />3 stocks available
+                </span>
+              </div>
+              <div className="col-4 text-end">
+                <button className="wishlist-btn" type="button">
+                  <i className="bi" />
+                </button>
+              </div>
+            </div>
+
+            {/* Meta Info */}
+            <div className="row gx-2 align-items-center mt-2">
+              <div className="col-8">
+                <div className="name-info d-flex align-items-center">
+                  <div className="author-img position-relative">
+                    <img
+                      className="shadow"
+                      src="img/bg-img/u4.jpg"
+                      alt={elem.owner}
+                    />
+                    <i
+                      className={`bi bi-check position-absolute bg-success true`}
+                    />
+                  </div>
+
+                  <div className="name-author">
+                    <OverlayTrigger
+                      placement="top"
+                      delay={{ show: 250, hide: 400 }}
+                      overlay={
+                        <Tooltip id={`liveAuctionNFT${elem.tokenId}`}>
+                          {elem.name}
+                        </Tooltip>
+                      }
+                    >
+                      <Link
+                        className="name d-block hover-primary text-truncate"
+                        to={`/live-bid/${elem.tokenId}`}
+                      >
+                        {elem.name}
+                      </Link>
+                    </OverlayTrigger>
+                    <Link
+                      className="author d-block fz-12 hover-primary text-truncate"
+                      to={`/author/${elem.owner}`}
+                    >
+                      ...{elem.owner.substring(30, 42)}
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-4">
+                <div className="price text-end">
+                  <span className="fz-12 d-block">Current Bid</span>
+                  <h6 className="mb-0">{elem.price}</h6>
+                </div>
+              </div>
+
+              <div className="col-12">
+                <Link
+                  className={`btn btn-primary rounded-pill btn-sm mt-3 w-100`}
+                  to={`/live-bid/${elem.tokenId}`}
+                >
+                  {/* <i className={`bi ${elem.buttonInfo[0].icon} me-1`} ></i> */}
+                  Place Bid
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
-    ))
+      </div>
+    ));
 
     return (
         <>

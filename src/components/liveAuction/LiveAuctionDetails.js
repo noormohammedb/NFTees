@@ -4,9 +4,6 @@ import Countdown from "react-countdown";
 import Modal from "react-bootstrap/Modal";
 import Tooltip from "react-bootstrap/Tooltip";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
-import Dropdown from "react-bootstrap/Dropdown";
-import Tabs from "react-bootstrap/Tabs";
-import Tab from "react-bootstrap/Tab";
 import TinySlider from "tiny-slider-react";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
@@ -48,7 +45,7 @@ const LiveAuctionDetails = () => {
       data.push(i);
     }
     console.log("data", data);
-    
+
 
     /*
      *  map over items returned from smart contract and format
@@ -611,18 +608,18 @@ const LiveAuctionDetails = () => {
 
       <Divider />
 
-      <CTA
+      {/* <CTA
         backgroundColor="primary" // try 'success', 'warning', 'danger', 'info' etc
         text="Resources for getting started with Funto."
         buttonText="Get Started"
         buttonColor="warning"
         buttonURL="#"
         buttonIcon=""
-      />
+      /> */}
 
-      <Divider />
+      {/* <Divider />
 
-      <Footer />
+      <Footer /> */}
     </>
   );
 };

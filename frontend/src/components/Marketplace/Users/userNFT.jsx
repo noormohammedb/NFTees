@@ -2,7 +2,7 @@ import { ethers } from 'ethers'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import Web3Modal from 'web3modal'
-import {  useHistory } from 'react-router'
+import { useHistory } from 'react-router'
 
 import {
   marketplaceAddress
@@ -13,7 +13,7 @@ import NFTMarketplace from '../../../blockchain/artifacts/contracts/nftMarketpla
 export default function UserNfts() {
   const [nfts, setNfts] = useState([])
   const [loadingState, setLoadingState] = useState('not-loaded')
-  const router =  useHistory();
+  const router = useHistory();
   useEffect(() => {
     loadNFTs()
   }, [])
@@ -44,11 +44,12 @@ export default function UserNfts() {
       return item
     }))
     setNfts(items)
-    setLoadingState('loaded') 
+    setLoadingState('loaded')
   }
   function listNFT(nft) {
     console.log('nft:', nft)
-    router.push(`/sellnfts?id=${nft.tokenId}&tokenURI=${nft.tokenURI}`)
+    // window.location.href = `/sellnfts?id=${nft.tokenId}&tokenURI=${nft.tokenURI}`
+    //router.push(`/sellnfts?id=${nft.tokenId}&tokenURI=${nft.tokenURI}`)
   }
   if (loadingState === 'loaded' && !nfts.length) return (<h1 className="py-10 px-20 text-3xl">No NFTs owned</h1>)
   return (
@@ -61,13 +62,13 @@ export default function UserNfts() {
                 <img src={nft.image} className="rounded" />
                 <div className="p-4 bg-black">
                   <p className="text-2xl font-bold text-white">Price - {nft.price} Eth</p>
-                  <button className="mt-4 w-full bg-pink-500 text-white font-bold py-2 px-12 rounded" onClick={() => listNFT(nft)}>List</button>
-                </div>
+                  <button className="mt-4 w-full bg-pink-500 text-white font-bold py-2 px-12 rounded" onClick={() => listNFT(nft)}><a href = {`/sellnfts/?id=${nft.tokenId}&tokenURI=${nft.tokenURI}`}>List</a></button>
               </div>
-            ))
+              </div>
+        ))
           }
-        </div>
       </div>
     </div>
+    </div >
   )
 }

@@ -7,6 +7,7 @@ import CreateNFT from './components/Marketplace/Designer/createNFT';
 import Home from './components/Marketplace/Users/user-home';
 import UserDashboard from './components/Marketplace/Users/user-dashboard';
 import UserNfts from './components/Marketplace/Users/userNFT';
+import SelluserNFT from './components/Marketplace/Users/selluserNFT';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route exact path="/createnfts" component={CreateNFT} />
         <Route exact path="/userdashboard" component={UserDashboard} />
         <Route exact path="/usernfts" component={UserNfts} />
+        <Route  path="/sellnfts/:id" component={SelluserNFT} />
         <Route exact path="/home" component={Home} />
       </Switch>
     </div>

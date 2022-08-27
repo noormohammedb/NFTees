@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 import axios from "axios";
 import BlogItem from "./BlogItem";
 import { marketplaceAddress } from "../../../../blockchain/config";
-import NFTMarketplace from "../../../../blockchain/artifacts/contracts/NFTMarketplace.sol/NFTMarketplace.json";
+import NFTMarketplace from "../../../../blockchain/artifacts/contracts/nftMarketplace.sol/NFTMarketplace.json";
 import Web3Modal from 'web3modal'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';

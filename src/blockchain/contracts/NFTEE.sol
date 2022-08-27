@@ -8,10 +8,11 @@ contract NFTEE is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     address private admin;
-    
+
     constructor() ERC721("Nftee", "NTE") {
         admin = msg.sender;
     }
+
     modifier _onlyAdmin() {
         require(msg.sender == admin);
         _;
@@ -36,18 +37,9 @@ contract NFTEE is ERC721URIStorage {
     mapping(uint256 => NFTLiquidityPool) public nft_liq_pools;
 
     // round_no => nft id => voter address => pair { vote and tokens }
-    mapping(uint256 => mapping(uint256 => mapping(address => Pair))) public round_info;
+    mapping(uint256 => mapping(uint256 => mapping(address => Pair)))
+        public round_info;
 
-    // function mint(uint256 creater_percent) public returns (uint256) {
-    //     _tokenIds.increment();
-    //     uint256 newItemId = _tokenIds.current();
-    //     _mint(msg.sender, newItemId);
-    //     uint256 creater_fraction = (default_fractions * creater_percent) / 100;
-
-    //     nft_liq_pools[newItemId].nft_liq = default_fractions - creater_fraction;
-    //     nft_liq_pools[newItemId].token_liq = 20;
-    //     return newItemId;
-    // }
     uint256 public roundNumber;
 
     function mint(string calldata _tokenURI) public returns (uint256) {
@@ -62,7 +54,7 @@ contract NFTEE is ERC721URIStorage {
         require(authorCutPercent <= 100, "Cannot claim more than 100%");
         require(msg.sender == ownerOf(tokenId), "Only owner can list an asset");
         require(msg.value == default_listing_cost, "Incorrect amount sent");
-        // require(pToken.allowance(msg.sender, address(this)) > default_listing_cost 
+        // require(pToken.allowance(msg.sender, address(this)) > default_listing_cost
         //         && pToken.balanceOf(msg.sender) > default_listing_cost, "Balance too low or not enough allowance");
         // Verify balance of lister
         // require(pToken.balanceOf(msg.sender) > default_listing_cost, "Not enough balance in allowance to list");
@@ -81,33 +73,50 @@ contract NFTEE is ERC721URIStorage {
         });
     }
 
-    // ----------------------------------------------------
-    function vote(uint256 nftId, uint256 token) public {
+    function vote(uint256 nftId) public payable {
         uint256 round_no = roundNumber;
+        uint256 my_token_count = msg.value;
 
-        uint256 current_nfg_liq = round_info[round_no][nftId][msg.sender]
-            .vote_count;
+        // Check if nft is listed in the protocol
+        require(
+            is_candidate[round_no][nftId],
+            "NFT is not listed in this round"
+        );
 
-        // uint256 current_token_liq = round_info[round_no][nftId][msg.sender]
-        // .token_liq;
+        uint256 current_nft_liq = nft_liq_pools[nftId].nft_liq;
+        uint256 current_token_liq = nft_liq_pools[nftId].token_liq;
 
-        // uint256 no_of_fraction_with_the_token = (CONSTANT /
-        //     (current_liquidity + token)) + remaining_vote;
+        uint256 NFT_constant = current_nft_liq + current_token_liq;
 
-        // updating the liquidity data
-        // round_info[nftId].current_liqiudity = round_info[round_no][msg.sender][
-        //     nftId
-        // ].no_of_votes = 0;
+        uint256 my_vote = (current_nft_liq - NFT_constant) /
+            (current_token_liq - my_token_count);
 
-        // round_info[nftId].current_liqiudity =
-        //     round_info[nftId].current_liqiudity -
-        //     token;
+        // update the liquidity pool of the nft
+        nft_liq_pools[nftId].nft_liq = current_nft_liq - my_vote;
+        nft_liq_pools[nftId].token_liq = current_token_liq - my_token_count;
 
-        // round_info[round_no][msg.sender][nftId].no_of_votes += token;
-        // round_info[round_no][msg.sender][nftId].no_of_tokens += token;
+        round_info[round_no][nftId][msg.sender] = Pair({
+            vote_count: my_vote,
+            token_count: my_token_count
+        });
+
+        emit VotedForAnNFTEvent(nftId, msg.sender, my_vote, my_token_count);
     }
 
     function update_round() private _onlyAdmin {
         roundNumber++;
     }
+
+    event ListingEvent(
+        uint256 indexed nftId,
+        uint256 indexed authorCutPercent,
+        uint256 roundNumber
+    );
+
+    event VotedForAnNFTEvent(
+        uint256 indexed nftId,
+        address indexed voter,
+        uint256 vote,
+        uint256 tokenCount
+    );
 }

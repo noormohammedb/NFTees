@@ -41,6 +41,7 @@ const CreateNewContent = () => {
     name: "",
     description: "",
   });
+  const [mintednft, setMintedNft] = useState(false);
   async function onChange(e) {
     const file = e.target.files[0];
     setFiles(file);
@@ -107,6 +108,7 @@ const CreateNewContent = () => {
     console.log("res", res.events[0].args.tokenId.toNumber());
     setTokenRes(res.events[0].args.tokenId.toNumber());
     console.log("Transaction complete!");
+    setMintedNft(true);
     // let transaction2 = await contract.createPool(
     //   res.events[0].args.tokenId.toNumber(),
     //   5 //create a state for this
@@ -123,7 +125,10 @@ const CreateNewContent = () => {
 
     /* next, create the item */
     let contract = new ethers.Contract(nftAddress, NFTEE.abi, signer);
-    console.log("ethers.utils.parseEther", ethers.utils.parseUnits("25", "ether"));
+    console.log(
+      "ethers.utils.parseEther",
+      ethers.utils.parseUnits("25", "ether")
+    );
     console.log("resSale2", tokenRes);
 
     let transaction2 = await contract.createPool(
@@ -365,33 +370,37 @@ const CreateNewContent = () => {
                   </div>
                   <div className="col-4">
                     <div className="price text-end">
-                      <span className="fz-12 d-block">Current Bid</span>
+                      <span className="fz-12 d-block">Price</span>
                       <h6 className="mb-0">{formInput.price}</h6>
                     </div>
                   </div>
                 </div>
 
                 {/* Button */}
-                <div className="row gx-2 align-items-center mt-3">
-                  <div className="col-6">
-                    <button
-                      onClick={listNFTForSale2}
-                      className="btn btn-primary btn-sm rounded-pill"
-                      to="#"
-                    >
-                      Place bid
-                    </button>
+                {mintednft ? (
+                  <div className="row gx-2 align-items-center mt-3">
+                    <div className="col-6">
+                      <button
+                        onClick={listNFTForSale2}
+                        className="btn btn-warning btn-sm rounded-pill"
+                        to="#"
+                      >
+                        Place bid
+                      </button>
+                    </div>
+                    <div className="col-6 text-end">
+                      <Link
+                        className="btn btn-minimal btn-sm hover-primary"
+                        to="#"
+                      >
+                        <i className="bi bi-activity me-1" />
+                        Activity
+                      </Link>
+                    </div>
                   </div>
-                  <div className="col-6 text-end">
-                    <Link
-                      className="btn btn-minimal btn-sm hover-primary"
-                      to="#"
-                    >
-                      <i className="bi bi-activity me-1" />
-                      Activity
-                    </Link>
-                  </div>
-                </div>
+                ) : (
+                  <div></div>
+                )}
               </div>
             </div>
 

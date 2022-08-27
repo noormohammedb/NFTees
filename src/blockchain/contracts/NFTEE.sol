@@ -64,7 +64,7 @@ contract NFTEE is ERC721URIStorage {
         return newItemId;
     }
 
-    function list(uint256 tokenId, uint256 authorCutPercent) _isOngoing public payable {
+    function list(uint256 tokenId, uint256 authorCutPercent) public payable {
         require(authorCutPercent <= 100, "Cannot claim more than 100%");
         require(msg.sender == ownerOf(tokenId), "Only owner can list an asset");
         // require(msg.value == default_listing_cost, "Incorrect amount sent");
@@ -123,7 +123,7 @@ contract NFTEE is ERC721URIStorage {
         });
         roundNumber++;
     }
-    function foo(uint roundNo) public view returns (uint256[] memory) {
+    function arrayOfRound(uint roundNo) public view returns (uint256[] memory) {
     return candidates[roundNo];
     
     }

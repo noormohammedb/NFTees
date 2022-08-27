@@ -29,9 +29,9 @@ const LiveBidding = () => {
         /* create a generic provider and query for unsold market items */
         const provider = new ethers.providers.JsonRpcProvider()
         const contract = new ethers.Contract(nftAddress, NFTEE.abi, provider)
-		const round = await contract.roundNumber();
-		console.log(round.toNumber());
-		const data = await contract.arrayOfRound(round.toNumber());
+		    const round = await contract.roundNumber();
+		    console.log(round.toNumber());
+		    const data = await contract.arrayOfRound(round.toNumber());
 
         /*
         *  map over items returned from smart contract and format 

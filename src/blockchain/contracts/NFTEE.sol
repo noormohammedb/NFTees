@@ -1,14 +1,12 @@
 // contracts/GameItem.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import "./protocolToken.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract NFTEE is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
-    ProtocolToken public pToken;
     address private admin;
     
     constructor() ERC721("Nftee", "NTE") {
@@ -31,14 +29,14 @@ contract NFTEE is ERC721URIStorage {
     }
 
     // Round number => list of candidate tokenIds
-    mapping(uint256 => uint256[]) candidates;
+    mapping(uint256 => uint256[]) public candidates;
     // Round number => tokenId => Whether it is listed in the protocol
-    mapping(uint256 => mapping(uint256 => bool)) is_candidate;
+    mapping(uint256 => mapping(uint256 => bool)) public is_candidate;
     // NFT tokenId => NFTLiquidityPool
-    mapping(uint256 => NFTLiquidityPool) nft_liq_pools;
+    mapping(uint256 => NFTLiquidityPool) public nft_liq_pools;
 
     // round_no => nft id => voter address => pair { vote and tokens }
-    mapping(uint256 => mapping(uint256 => mapping(address => Pair))) round_info;
+    mapping(uint256 => mapping(uint256 => mapping(address => Pair))) public round_info;
 
     // function mint(uint256 creater_percent) public returns (uint256) {
     //     _tokenIds.increment();
@@ -74,7 +72,6 @@ contract NFTEE is ERC721URIStorage {
             nft_liq: default_fraction_count - authorCut,
             token_liq: default_listing_cost
         });
-        pToken.transferFrom(msg.sender, address(this), default_listing_cost);
         candidates[roundNumber].push(tokenId);
         is_candidate[roundNumber][tokenId] = true;
         // Add this listing to the current round

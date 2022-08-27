@@ -9,6 +9,7 @@ contract NFTEE is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     Counters.Counter private _poolIds;
+    Counters.Counter private _farmIds; 
     uint256 public constant SECONDS_PER_BLOCK = 2;
     uint256 public constant SECONDS_PER_ROUND = 30;
     uint256 public constant WINNERS_PER_ROUND = 2;
@@ -36,11 +37,25 @@ contract NFTEE is ERC721URIStorage {
         uint256 nft_fractions;
         uint256 token_liq;
     }
+    struct FarmData {
+        uint256 farmId;
+        uint256 tokenId;
+        bool exists;
+        // Mapping address to fractions locked
+        mapping(address => uint256) balances;
+        // Total amount that is locked inside this farm
+        uint256 totalLiquidity;
+    }
     // Pool id => NFTLiquidityPoolData
     mapping(uint256 => NFTLiquidityPoolData) public pool_data;
     // tokenId => poolId
     mapping(uint256 => uint256) tokenToPoolMap;
-
+    // address => tokenId => fractions held
+    mapping(address => mapping(uint256 => uint256)) balances;
+    // Farm id => Farm data
+    mapping(uint256 => FarmData) farm_data;
+    //  tokenId => farm id
+    mapping(uint256 => uint256) tokenIdToFarmMap;
     function mint(string calldata _tokenURI) public returns (uint256) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
@@ -68,9 +83,36 @@ contract NFTEE is ERC721URIStorage {
             token_liq: msg.value
         });
         tokenToPoolMap[tokenId] = currentPoolId;
+        balances[msg.sender][tokenId] = authorCut;
         // TODO: Emit relevant event
     }
+    
+    function swap(uint256 poolId, uint256 fractionCount) public payable {
+        require(!(msg.value > 0 && fractionCount > 0), "Invalid call. Cannot decide which side");
+        if(msg.value > 0){
+            // Swap FROM MATIC to Fractions
 
+        } else {
+            // Swap TO MATIC from Fractions
+            require(balances[msg.sender][pool_data[poolId].tokenId] >= fractionCount, "Not enough fractions in balance");
+
+        }
+    }
+    function stakeToFarm(uint256 farmId) public {
+
+    }
+    function unstakeFromFarm(uint256 farmId) public {
+
+    }
+    function claimFarmRewards(uint256 farmId) public {
+
+    }
+    function makeNewFarm() _onlyAdmin public {
+        
+    }
+    function addProfitToFarm(uint256 farmId) public payable {
+
+    }
     // function vote(uint256 nftId) public payable {
     //     uint256 my_token_count = msg.value;
 

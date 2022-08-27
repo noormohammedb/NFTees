@@ -63,6 +63,9 @@ contract NFTEE is ERC721URIStorage {
     // farmId => profit balance map
     mapping(uint256 => mapping(address => uint256)) public farmProfits;
 
+    function lastTokenId() public view returns (uint256) {
+        return _tokenIds.current();
+    }
     function mint(string calldata _tokenURI) public returns (uint256) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
@@ -71,7 +74,7 @@ contract NFTEE is ERC721URIStorage {
         emit MintingEvent(newItemId, msg.sender);
         return newItemId;
     }
-
+    
     function createPool(uint256 tokenId, uint256 authorCutPercent) _isValidTokenId(tokenId) public payable {
         require(authorCutPercent <= 100, "Cannot claim more than 100%");
         require(msg.value < MINIMUM_INITIAL_LIQUIDITY, "No initial liquidity provided");

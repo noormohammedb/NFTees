@@ -6,10 +6,10 @@ import axios from 'axios'
 import Web3Modal from 'web3modal'
 
 import {
-  marketplaceAddress
+  nftAddress
 } from '../../../blockchain/config'
 
-import NFTMarketplace from '../../../blockchain/artifacts/contracts/nftMarketplace.sol/NFTMarketplace.json'
+import NFTEE from '../../../blockchain/artifacts/contracts/NFTEE.sol/NFTEE.json'
 
 export default function SelluserNFT() {
   const [formInput, updateFormInput] = useState({ price: '', image: '' })
@@ -38,7 +38,7 @@ export default function SelluserNFT() {
     const signer = provider.getSigner()
 
     const priceFormatted = ethers.utils.parseUnits(formInput.price, 'ether')
-    let contract = new ethers.Contract(marketplaceAddress, NFTMarketplace.abi, signer)
+    let contract = new ethers.Contract(nftAddress, NFTEE.abi, signer)
     let listingPrice = await contract.getListingPrice()
 
     listingPrice = listingPrice.toString()

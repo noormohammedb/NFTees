@@ -5,10 +5,10 @@ import Web3Modal from 'web3modal'
 import { useHistory } from 'react-router'
 
 import {
-  marketplaceAddress
+  nftAddress
 } from '../../../blockchain/config'
 
-import NFTMarketplace from '../../../blockchain/artifacts/contracts/nftMarketplace.sol/NFTMarketplace.json'
+import NFTEE from '../../../blockchain/artifacts/contracts/NFTEE.sol/NFTEE.json'
 
 export default function UserNfts() {
   const [nfts, setNfts] = useState([])
@@ -26,7 +26,7 @@ export default function UserNfts() {
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
 
-    const marketplaceContract = new ethers.Contract(marketplaceAddress, NFTMarketplace.abi, signer)
+    const marketplaceContract = new ethers.Contract(nftAddress, NFTEE.abi, signer)
     const data = await marketplaceContract.fetchMyNFTs()
 
     const items = await Promise.all(data.map(async i => {

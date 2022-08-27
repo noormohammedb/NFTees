@@ -6,8 +6,8 @@ import Navbar from "./../../designNFTpage/sections/Navbar/Navbar.jsx";
 import Footer from "./../../designNFTpage/sections/Footer/Footer.jsx";
 import { ethers } from "ethers";
 import axios from "axios";
-import { marketplaceAddress } from "../../../blockchain/config";
-import NFTMarketplace from "../../../blockchain/artifacts/contracts/nftMarketplace.sol/NFTMarketplace.json";
+import { nftAddress } from "../../../blockchain/config";
+import NFTEE from "../../../blockchain/artifacts/contracts/NFTEE.sol/NFTEE.json";
 
 function home () {
 	const [nfts, setNfts] = useState([]);
@@ -18,24 +18,28 @@ function home () {
 	async function loadNFTs() {
 		const provider = new ethers.providers.JsonRpcProvider();
 		const contract = new ethers.Contract(
-			marketplaceAddress,
-			NFTMarketplace.abi,
+			nftAddress,
+			NFTEE.abi,
 			provider
 		);
 		console.log(contract);
-		const data = await contract.fetchMarketItems();
+		
+		const round = await contract.roundNumber();
+		console.log(round.toNumber());
+		const data = await contract.foo(round.toNumber());
+		console.log(data);
 
 		const items = await Promise.all(
-			data.map(async (i) => {
-				const tokenUri = await contract.tokenURI(i.tokenId);
+			data.map(async (candidate) => {
+				const tokenUri = await contract.tokenURI(candidate);
 				const meta = await axios.get(tokenUri);
 				console.log(meta.data);
-				let price = ethers.utils.formatUnits(i.price.toString(), "ether");
+				// let price = ethers.utils.formatUnits(i.price.toString(), "ether");
 				let item = {
-					price,
-					tokenId: i.tokenId.toNumber(),
-					seller: i.seller,
-					owner: i.owner,
+					// price,
+					tokenId: candidate.toNumber(),
+					// seller: i.seller,
+					owner: await contract.ownerOf(candidate),
 					image: meta.data.image,
 					name: meta.data.name,
 					description: meta.data.description,
@@ -43,6 +47,7 @@ function home () {
 					nftstoragedata: meta.data.nftstoragedata,
 					wallet_address: meta.data.wallet_address,
 				};
+				console.log(item);
 				return item;
 			})
 		);

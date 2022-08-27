@@ -4,10 +4,10 @@ import axios from 'axios'
 import Web3Modal from 'web3modal'
 
 import {
-  marketplaceAddress
+  nftAddress
 } from '../../../blockchain/config'
 
-import NFTMarketplace from '../../../blockchain/artifacts/contracts/nftMarketplace.sol/NFTMarketplace.json'
+import NFTEE from '../../../blockchain/artifacts/contracts/NFTEE.sol/NFTEE.json'
 
 export default function Home() {
   const [nfts, setNfts] = useState([])
@@ -18,7 +18,7 @@ export default function Home() {
   async function loadNFTs() {
     /* create a generic provider and query for unsold market items */
     const provider = new ethers.providers.JsonRpcProvider()
-    const contract = new ethers.Contract(marketplaceAddress, NFTMarketplace.abi, provider)
+    const contract = new ethers.Contract(nftAddress, NFTEE.abi, provider)
     const data = await contract.fetchMarketItems()
 
     /*
@@ -49,7 +49,7 @@ export default function Home() {
     const connection = await web3Modal.connect()
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
-    const contract = new ethers.Contract(marketplaceAddress, NFTMarketplace.abi, signer)
+    const contract = new ethers.Contract(nftAddress, NFTEE.abi, signer)
 
     /* user will be prompted to pay the asking proces to complete the transaction */
     const price = ethers.utils.parseUnits(nft.price.toString(), 'ether')   

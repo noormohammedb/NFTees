@@ -17,8 +17,8 @@ contract NFTEE is ERC721URIStorage {
         require(msg.sender == admin);
         _;
     }
-    uint256 default_listing_cost = 20;
-    uint256 default_fraction_count = 10_000;
+    uint256 public default_listing_cost = 20;
+    uint256 public default_fraction_count = 10_000;
 
     struct Pair {
         uint256 vote_count;
@@ -42,18 +42,19 @@ contract NFTEE is ERC721URIStorage {
 
     uint256 public roundNumber;
 
-    function mint(string calldata _tokenURI) public returns (uint256) {
+    function mint(string calldata _tokenURI) public payable returns (uint256) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         _mint(msg.sender, newItemId);
         _setTokenURI(newItemId, _tokenURI);
+        emit MintingEvent(newItemId, msg.sender);
         return newItemId;
     }
 
     function list(uint256 tokenId, uint256 authorCutPercent) public payable {
         require(authorCutPercent <= 100, "Cannot claim more than 100%");
         require(msg.sender == ownerOf(tokenId), "Only owner can list an asset");
-        require(msg.value == default_listing_cost, "Incorrect amount sent");
+        // require(msg.value == default_listing_cost, "Incorrect amount sent");
 
         uint256 authorCut = (default_fraction_count * authorCutPercent) / 100;
         nft_liq_pools[tokenId] = NFTLiquidityPool({
@@ -102,7 +103,14 @@ contract NFTEE is ERC721URIStorage {
     function update_round() private _onlyAdmin {
         roundNumber++;
     }
-
+    function foo(uint roundNo) public view returns (uint256[] memory) {
+    return candidates[roundNo];
+    
+    }
+    event MintingEvent(
+        uint256 tokenId,
+        address owner
+    );
     event ListingEvent(
         uint256 indexed nftId,
         uint256 indexed authorCutPercent,

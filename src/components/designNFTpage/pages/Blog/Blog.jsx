@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import axios from "axios";
 import BlogItem from "./BlogItem";
-import { marketplaceAddress } from "../../../../blockchain/config";
-import NFTMarketplace from "../../../../blockchain/artifacts/contracts/nftMarketplace.sol/NFTMarketplace.json";
+import { nftAddress } from "../../../../blockchain/config";
+import NFTEE from "../../../../blockchain/artifacts/contracts/NFTEE.sol/NFTEE.json";
 import Web3Modal from 'web3modal'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -17,8 +17,8 @@ const Blog = ({ wallet_address }) => {
 	async function loadNFTs() {
 		const provider = new ethers.providers.JsonRpcProvider();
 		const contract = new ethers.Contract(
-			marketplaceAddress,
-			NFTMarketplace.abi,
+			nftAddress,
+			NFTEE.abi,
 			provider
 		);
 		console.log(contract);
@@ -57,7 +57,7 @@ const Blog = ({ wallet_address }) => {
 //     const connection = await web3Modal.connect()
 //     const provider = new ethers.providers.Web3Provider(connection)
 //     const signer = provider.getSigner()
-//     const contract = new ethers.Contract(marketplaceAddress, NFTMarketplace.abi, signer)
+//     const contract = new ethers.Contract(nftAddress, NFTEE.abi, signer)
 
 //     /* user will be prompted to pay the asking proces to complete the transaction */
 //     const price = ethers.utils.parseUnits(nft.price.toString(), 'ether')   

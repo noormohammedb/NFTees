@@ -20,6 +20,7 @@ import Footer from "../footer/Footer";
 import Breadcrumb from "../breadcrumb/Breadcrumb";
 import Divider from "../divider/Divider";
 import CTA from "../cta/CTA";
+import Swap from "../swap/swap";
 import LiveAuctionData from "../../data/liveAuction/live-auction.json";
 
 const LiveAuctionDetails = () => {
@@ -77,19 +78,19 @@ const LiveAuctionDetails = () => {
   }
   const nftData = nfts.filter((i) => i.tokenId == bidID);
   console.log("nftData type", typeof nftData);
-    console.log("nftData", nftData);
-    var nftdata = {
-      tokenId: "",
-      owner: "",
-      image: "",
-      name: "",
-      description: "",
-      nftstorage: "",
-      nftstoragedata: "",
-      price: "",
-    };
+  console.log("nftData", nftData);
+  var nftdata = {
+    tokenId: "",
+    owner: "",
+    image: "",
+    name: "",
+    description: "",
+    nftstorage: "",
+    nftstoragedata: "",
+    price: "",
+  };
   if (nftData.length == 0) {
-     nftdata = {
+    nftdata = {
       tokenId: "",
       owner: "",
       image: "",
@@ -100,7 +101,7 @@ const LiveAuctionDetails = () => {
       price: "",
     };
   } else {
-     nftdata = nftData[0];
+    nftdata = nftData[0];
     console.log("nftdata ", nftdata.owner);
   }
 
@@ -518,36 +519,13 @@ const LiveAuctionDetails = () => {
                 <div className="border-top w-75 mb-4" />
 
                 {/* Bids Countdown */}
-                <p className="lh-1">Bid ending soon</p>
-                <Countdown
+                <p className="lh-1">Swap</p>
+                {/* <Countdown
                   date="April 24, 2023 00:00:00"
                   intervalDelay={0}
                   renderer={clockTime}
-                />
-
-                <div className="mb-4"></div>
-
-                <div className="row align-items-end">
-                  <div className="col-6 col-sm-4">
-                    <p className="mb-2">Current Bid</p>
-                    <h5 className="text-center mb-0 border border-2 px-3 py-2 border-primary d-inline-block rounded text-primary w-100">
-                      {nftdata.price}
-                    </h5>
-                  </div>
-                  <div className="col-6 col-sm-4 col-lg-5">
-                    <Link
-                      className={`btn btn-primary rounded-pill w-100`}
-                      to="#"
-                    >
-                      {/* <img
-                        className="me-1"
-                        src={`${process.env.PUBLIC_URL}/${bidsdata.buttonInfo[0].icon}`}
-                        alt=""
-                      /> */}
-                      Place Bid
-                    </Link>
-                  </div>
-                </div>
+                /> */}
+                <Swap />
 
                 <div className="border-top w-75 my-4" />
 

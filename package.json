@@ -1,41 +1,54 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "funto",
+  "version": "1.1.0",
   "private": true,
+  "main": "dist/index",
   "dependencies": {
-    "@craco/craco": "^5.9.0",
-    "@ffmpeg-installer/ffmpeg": "^1.1.0",
-    "@headlessui/react": "^1.4.2",
-    "@openzeppelin/contracts": "^4.7.1",
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.1.0",
-    "@testing-library/user-event": "^12.1.10",
+    "@testing-library/jest-dom": "^5.16.1",
+    "@testing-library/react": "^12.1.2",
+    "@testing-library/user-event": "^13.5.0",
+    "apexcharts": "^3.33.2",
     "axios": "^0.27.2",
+    "bootstrap": "^5.1.3",
     "buffer": "^6.0.3",
-    "chart.js": "^3.8.0",
-    "ethers": "^5.6.9",
-    "fluent-ffmpeg": "^2.1.2",
+    "ethers": "^5.7.0",
     "ipfs-http-client": "^57.0.3",
+    "jquery": "^3.6.0",
+    "jquery-nice-select": "^1.1.0",
     "nft.storage": "^7.0.0",
-    "query-string": "^7.1.1",
-    "react": "^17.0.2",
-    "react-chartjs-2": "^4.3.1",
+    "node-sass": "^7.0.1",
+    "react": "^18.1.0",
+    "react-animate-on-scroll": "^2.1.5",
+    "react-apexcharts": "^1.3.9",
+    "react-bootstrap": "^2.2.0",
+    "react-bootstrap-table-next": "^4.0.3",
+    "react-bootstrap-table2-paginator": "^2.1.2",
+    "react-countdown": "^2.3.2",
+    "react-countup": "^6.1.1",
     "react-dom": "^17.0.2",
-    "react-icons": "^4.4.0",
-    "react-router": "^5.2.0",
-    "react-router-config": "^5.1.1",
-    "react-router-dom": "^5.2.0",
-    "react-scripts": "^5.0.1",
-    "react-toastify": "^7.0.4",
-    "stable": "^0.1.8",
-    "web-vitals": "^1.0.1",
-    "web3modal": "^1.9.8"
+    "react-helmet-async": "^1.2.3",
+    "react-medium-image-zoom": "^4.3.5",
+    "react-on-screen": "^2.1.1",
+    "react-router-dom": "^6.2.2",
+    "react-scripts": "^5.0.0",
+    "react-scroll-to-top": "^1.0.8",
+    "tiny-slider-react": "^0.5.4",
+    "web-vitals": "^2.1.4",
+    "web3modal": "^1.9.9"
+  },
+  "overrides": {
+    "autoprefixer": "10.4.5"
   },
   "scripts": {
-    "start": "react-scripts start",
+     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
   },
   "browserslist": {
     "production": [
@@ -48,26 +61,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "autoprefixer": "^9.8.8",
-    "eslint": "^7.32.0",
-    "eslint-config-airbnb": "^19.0.0",
-    "eslint-config-node": "^4.1.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-import": "^2.25.3",
-    "eslint-plugin-jsx-a11y": "^6.5.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-react": "^7.27.0",
-    "eslint-plugin-react-hooks": "^4.3.0",
-    "postcss": "^8.4.14",
-    "postcss-flexbugs-fixes": "^5.0.2",
-    "postcss-preset-env": "^7.7.2",
-    "prettier": "^2.4.1",
-    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.17"
-  },
-  "peerDependencies": {
-    "postcss": "^8.4.14"
   }
 }

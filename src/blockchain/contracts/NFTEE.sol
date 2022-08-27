@@ -76,12 +76,37 @@ contract NFTEE is ERC721URIStorage {
         is_candidate[roundNumber][tokenId] = true;
     }
 
-    // ----------------------------------------------------
-    function vote(uint256 nftId, uint256 token) public {
+    /* TODO:
+        Make payable and compute the amount of tokens to be transferred.
+        At presend token count is from the fn argument
+    */
+    function vote(uint256 nftId, uint256 my_token_count) public {
         uint256 round_no = roundNumber;
 
-        uint256 current_nfg_liq = round_info[round_no][nftId][msg.sender]
-            .vote_count;
+        // Check if nft is listed in the protocol
+        require(
+            is_candidate[round_no][nftId],
+            "NFT is not listed in this round"
+        );
+
+        uint256 current_nft_liq = nft_liq_pools[nftId].nft_liq;
+        uint256 current_token_liq = nft_liq_pools[nftId].token_liq;
+
+        uint256 NFT_constant = current_nft_liq + current_token_liq;
+
+        uint256 my_vote = (current_nft_liq - NFT_constant) /
+            (current_token_liq - my_token_count);
+
+        // update the liquidity pool of the nft
+        nft_liq_pools[nftId].nft_liq = current_nft_liq - my_vote;
+        nft_liq_pools[nftId].token_liq = current_token_liq - my_token_count;
+
+        round_info[round_no][nftId][msg.sender] = Pair({
+            vote_count: my_vote,
+            token_count: my_token_count
+        });
+
+        emit VotedForAnNFT(nftId, msg.sender, my_vote, my_token_count);
 
         // uint256 current_token_liq = round_info[round_no][nftId][msg.sender]
         // .token_liq;
@@ -105,4 +130,11 @@ contract NFTEE is ERC721URIStorage {
     function update_round() private _onlyAdmin {
         roundNumber++;
     }
+
+    event VotedForAnNFT(
+        uint256 indexed nftId,
+        address indexed voter,
+        uint256 vote,
+        uint256 tokenCount
+    );
 }

@@ -116,6 +116,10 @@ contract NFTEE is ERC721URIStorage {
         require(block.number >= roundDuration.endBlock, "Round ongoing");
         calculateWinners();
         reimburseLosers();
+        roundDuration = Duration({
+            startBlock: block.number,
+            endBlock: block.number + (SECONDS_PER_ROUND/SECONDS_PER_BLOCK)
+        });
         roundNumber++;
     }
 

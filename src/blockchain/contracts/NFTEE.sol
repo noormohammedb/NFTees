@@ -82,16 +82,10 @@ contract NFTEE is ERC721URIStorage {
         _isValidTokenId(tokenId)
     {
         require(authorCutPercent <= 100, "Cannot claim more than 100%");
-        require(
-            msg.value < MINIMUM_INITIAL_LIQUIDITY,
-            "No initial liquidity provided"
-        );
+        require(msg.value > MINIMUM_INITIAL_LIQUIDITY, "No initial liquidity provided");
         require(msg.sender == ownerOf(tokenId), "Only owner can list an asset");
-        require(
-            _isApprovedOrOwner(address(this), tokenId),
-            "Contract is not an owner or approved address"
-        );
-        safeTransferFrom(msg.sender, address(this), tokenId);
+        // require(_isApprovedOrOwner(address(this), tokenId), "Contract is not an owner or approved address");
+        transferFrom(msg.sender, address(this), tokenId);
         // Now create a new pool data structure
         _poolIds.increment();
         uint256 currentPoolId = _poolIds.current();

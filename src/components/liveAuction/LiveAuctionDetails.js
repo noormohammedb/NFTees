@@ -28,7 +28,8 @@ const LiveAuctionDetails = () => {
   const bidDetailsData = LiveAuctionData.filter((is) => is.id === bidID);
   const bidsdata = bidDetailsData[0];
   console.log(typeof bidsdata);
-
+  const [TokenIds, setTokenIds] = useState(0);
+  const data = [];
   const [nfts, setNfts] = useState([]);
   const [loadingState, setLoadingState] = useState("not-loaded");
   useEffect(() => {
@@ -38,9 +39,16 @@ const LiveAuctionDetails = () => {
     /* create a generic provider and query for unsold market items */
     const provider = new ethers.providers.JsonRpcProvider();
     const contract = new ethers.Contract(nftAddress, NFTEE.abi, provider);
-    const round = await contract.roundNumber();
-    console.log(round.toNumber());
-    const data = await contract.arrayOfRound(round.toNumber());
+    const TokenIds = await contract.lastTokenId();
+    console.log("TokenIds", TokenIds);
+    setTokenIds(TokenIds.toNumber());
+    console.log("TokenIds", TokenIds.toNumber());
+    for (var i = 1; i <= TokenIds; i++) {
+      console.log(i);
+      data.push(i);
+    }
+    console.log("data", data);
+    
 
     /*
      *  map over items returned from smart contract and format
@@ -53,7 +61,7 @@ const LiveAuctionDetails = () => {
         // let price = ethers.utils.formatUnits(i.price.toString(), 'ether')
         let item = {
           // price,
-          tokenId: candidate.toNumber(),
+          tokenId: candidate,
           owner: await contract.ownerOf(candidate),
           image: meta.data.image,
           name: meta.data.name,

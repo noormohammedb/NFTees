@@ -24,14 +24,14 @@ module.exports = {
   //   apiKey: {
   //     polygonMumbai: process.env.POLYGONSCAN_API_KEY,
   //   },
-  // customChain: {
-  //   network: "polygonMumbai",
-  //   // chainId: 31337,
-  //   urls: {
-  //     apiUrl: "https://api-testnet.polygonscan.com/",
-  //     browserURL: "https://mumbai.polygonscan.com",
-  //   },
-  // },
+  //   // customChain: {
+  //   //   network: "polygonMumbai",
+  //   //   // chainId: 31337,
+  //   //   urls: {
+  //   //     apiUrl: "https://api-testnet.polygonscan.com/",
+  //   //     browserURL: "https://mumbai.polygonscan.com",
+  //   //   },
+  //   // },
   // },
   solidity: {
     version: "0.8.4",

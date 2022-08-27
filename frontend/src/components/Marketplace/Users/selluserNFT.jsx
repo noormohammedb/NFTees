@@ -11,7 +11,7 @@ import {
 
 import NFTMarketplace from '../../../blockchain/artifacts/contracts/nftMarketplace.sol/NFTMarketplace.json'
 
-export default function ResellNFT() {
+export default function SelluserNFT() {
   const [formInput, updateFormInput] = useState({ price: '', image: '' })
   const queryParams = queryString.parse(window.location.search)
   const {id} = queryParams.id

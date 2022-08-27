@@ -131,22 +131,13 @@ contract NFTEE is ERC721URIStorage {
         }
     }
 
-    function stakeToFarm(uint256 farmId) public payable _isValidFarmId(farmId) {
+    function stakeToFarm(uint256 farmId, uint256 fractionCount) public _isValidFarmId(farmId) {
         uint256 tokenId = farm_data[farmId].tokenId;
-        // farmId=>FarmData{tokenId} tokenId => poolId
-        uint256 poolId = tokenToPoolMap[tokenId];
+        require(fractionCount <= fractionBalances[msg.sender][tokenId], "Insufficient fraction balance");
 
-        uint256 NFT_constant = pool_data[poolId].nft_fractions *
-            pool_data[poolId].token_liq;
-
-        uint256 fraction_i_get = pool_data[poolId].nft_fractions -
-            (NFT_constant / (msg.value - pool_data[poolId].token_liq));
-
-        // update the pool data
-        pool_data[poolId].nft_fractions -= fraction_i_get;
-        pool_data[poolId].token_liq += msg.value;
-
-        fractionBalances[msg.sender][tokenId] += fraction_i_get;
+        fractionBalances[msg.sender][tokenId] -= fractionCount;
+        farmBalances[farmId][msg.sender] += fractionCount;
+        farm_data[farmId].totalLiquidity += fractionCount;
         // TODO: Emit relevant event
     }
 
@@ -154,7 +145,7 @@ contract NFTEE is ERC721URIStorage {
         public
         _isValidFarmId(farmId)
     {
-        
+
         // farmId=>FarmData{tokenId}
         uint256 tokenId = farm_data[farmId].tokenId;
         // tokenId => poolId

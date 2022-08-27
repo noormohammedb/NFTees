@@ -213,21 +213,7 @@ const CreateNewContent = () => {
                                         </Form.Group>
                                     </div>
 
-                                    {/* Starting Date */}
-                                    <div className="col-12 col-sm-6">
-                                        <Form.Group className="mb-4">
-                                            <Form.Label className="mb-2 fz-16">Starting Date</Form.Label>
-                                            <Form.Control id="startingDate" type="date" />
-                                        </Form.Group>
-                                    </div>
-
-                                    {/* Ending Date */}
-                                    <div className="col-12 col-sm-6">
-                                        <Form.Group className="mb-4">
-                                            <Form.Label className="mb-2 fz-16">Ending Date</Form.Label>
-                                            <Form.Control id="endingDate" type="date" />
-                                        </Form.Group>
-                                    </div>
+                                   
 
                                     {/* Royality */}
                                     <div className="col-12 col-lg-4">
@@ -238,20 +224,14 @@ const CreateNewContent = () => {
                                     </div>
 
                                     {/* No of Copies */}
-                                    <div className="col-12 col-sm-6 col-lg-4">
+                                    {/* <div className="col-12 col-sm-6 col-lg-4">
                                         <Form.Group className="mb-4">
                                             <Form.Label className="mb-2 fz-16">No of copies</Form.Label>
                                             <Form.Control id="noOfcopies" type="text" placeholder="13" />
                                         </Form.Group>
-                                    </div>
+                                    </div> */}
 
-                                    {/* Size */}
-                                    <div className="col-12 col-sm-6 col-lg-4">
-                                        <Form.Group className="mb-4">
-                                            <Form.Label className="mb-2 fz-16">Size</Form.Label>
-                                            <Form.Control id="size" type="text" placeholder="20MB" />
-                                        </Form.Group>
-                                    </div>
+                                    
 
                                     {/* Agree with Terms */}
                                     <div className="col-12 col-md-8">

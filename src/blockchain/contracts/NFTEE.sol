@@ -1,6 +1,7 @@
 // contracts/GameItem.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
@@ -84,8 +85,8 @@ contract NFTEE is ERC721URIStorage {
 
         uint256 NFT_constant = current_nft_liq * current_token_liq;
 
-        uint256 my_vote = current_nft_liq - (NFT_constant /
-            (current_token_liq + my_token_count));
+        uint256 my_vote = current_nft_liq -
+            (NFT_constant / (current_token_liq + my_token_count));
 
         // update the liquidity pool of the nft
         nft_liq_pools[nftId].nft_liq = current_nft_liq - my_vote;

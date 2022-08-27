@@ -145,25 +145,11 @@ contract NFTEE is ERC721URIStorage {
         public
         _isValidFarmId(farmId)
     {
-
-        // farmId=>FarmData{tokenId}
         uint256 tokenId = farm_data[farmId].tokenId;
-        // tokenId => poolId
-        uint256 poolId = tokenToPoolMap[tokenId];
-
-        uint256 NFT_constant = pool_data[poolId].nft_fractions *
-            pool_data[poolId].token_liq;
-
-        uint256 fraction_i_have = fractionBalances[msg.sender][tokenId];
-
-        uint256 matic_i_get_ = (NFT_constant /
-            (pool_data[poolId].nft_fractions - fraction_i_have) -
-            pool_data[poolId].token_liq);
-
-        // update the pool data
-        pool_data[poolId].token_liq -= matic_i_get_;
-        pool_data[poolId].nft_fractions += fraction_i_have;
-        fractionBalances[msg.sender][tokenId] -= fraction_i_have;
+        require(farmBalances[tokenId][msg.sender] >= fractionCount, "Not enough balance in farm");
+        farmBalances[tokenId][msg.sender] -= fractionCount;
+        farm_data[farmId].totalLiquidity -= fractionCount;
+        fractionBalances[msg.sender][tokenId] += fractionCount;
         /* TODO: Emit relevant event
             Transfer the matic to the withdrawer needs RnD to figure out
         */

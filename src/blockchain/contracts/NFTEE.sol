@@ -8,10 +8,13 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract NFTEE is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
-
+    Counters.Counter private _poolIds;
+    Counters.Counter private _farmIds; 
     uint256 public constant SECONDS_PER_BLOCK = 2;
     uint256 public constant SECONDS_PER_ROUND = 30;
     uint256 public constant WINNERS_PER_ROUND = 2;
+    uint256 public constant DEFAULT_FRACTIONS_COUNT = 10_000;
+    uint256 public constant MINIMUM_INITIAL_LIQUIDITY = 20;
     address private admin;
 
     constructor() ERC721("Nftee", "NTE") {
@@ -22,40 +25,48 @@ contract NFTEE is ERC721URIStorage {
         require(msg.sender == admin);
         _;
     }
-    modifier _isOngoing() {
-        require(block.number >= roundDuration.startBlock && block.number < roundDuration.endBlock, "No round is ongoing. Please wait");
+
+    modifier _isValidTokenId(uint256 tokenId) {
+        require(tokenId <= _tokenIds.current(), "Invalid token Id");
         _;
     }
-    uint256 public default_listing_cost = 20;
-    uint256 public default_fraction_count = 10_000;
-    struct Duration{
-        uint256 startBlock;
-        uint256 endBlock;
+    modifier _isValidFarmId(uint256 farmId) {
+        require(farmId <= _farmIds.current(), "Invalid farm id");
+        _;
     }
-    struct VotePair {
-        uint256 vote_count;
-        uint256 token_count;
-    }
-    struct NFTLiquidityPool {
-        uint256 nft_liq;
+    struct NFTLiquidityPoolData {
+        uint256 tokenId;
+        uint256 poolId;
+        bool exists;
+        uint256 nft_fractions;
         uint256 token_liq;
     }
+    struct FarmData {
+        uint256 farmId;
+        uint256 tokenId;
+        bool exists;
+        // Total amount that is locked inside this farm
+        uint256 totalLiquidity;
+    }
+    // Pool id => NFTLiquidityPoolData
+    mapping(uint256 => NFTLiquidityPoolData) public pool_data;
+    // tokenId => poolId
+    mapping(uint256 => uint256) public tokenToPoolMap;
+    // address => tokenId => fractions held
+    mapping(address => mapping(uint256 => uint256)) public fractionBalances;
+    // Farm id => Farm data
+    mapping(uint256 => FarmData) public farm_data;
+    //  tokenId => farm id
+    mapping(uint256 => uint256) public tokenIdToFarmMap;
+    // farmid => balance map
+    mapping(uint256 => mapping(address => uint256)) public farmBalances;
+    // farmId => profit balance map
+    mapping(uint256 => mapping(address => uint256)) public farmProfits;
 
-    // Round number => list of candidate tokenIds
-    mapping(uint256 => uint256[]) public candidates;
-    // Round number => tokenId => Whether it is listed in the protocol
-    mapping(uint256 => mapping(uint256 => bool)) public is_candidate;
-    // NFT tokenId => NFTLiquidityPool
-    mapping(uint256 => NFTLiquidityPool) public nft_liq_pools;
-
-    // round_no => nft id => voter address => pair { vote and tokens }
-    mapping(uint256 => mapping(uint256 => mapping(address => VotePair)))
-        public round_info;
-
-    uint256 public roundNumber;
-    Duration public roundDuration;
-
-    function mint(string calldata _tokenURI) public payable returns (uint256) {
+    function lastTokenId() public view returns (uint256) {
+        return _tokenIds.current();
+    }
+    function mint(string calldata _tokenURI) public returns (uint256) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         _mint(msg.sender, newItemId);
@@ -63,78 +74,82 @@ contract NFTEE is ERC721URIStorage {
         emit MintingEvent(newItemId, msg.sender);
         return newItemId;
     }
-
-    function list(uint256 tokenId, uint256 authorCutPercent) public payable {
+    
+    function createPool(uint256 tokenId, uint256 authorCutPercent) _isValidTokenId(tokenId) public payable {
         require(authorCutPercent <= 100, "Cannot claim more than 100%");
+        require(msg.value < MINIMUM_INITIAL_LIQUIDITY, "No initial liquidity provided");
         require(msg.sender == ownerOf(tokenId), "Only owner can list an asset");
-        // require(msg.value == default_listing_cost, "Incorrect amount sent");
-
-        uint256 authorCut = (default_fraction_count * authorCutPercent) / 100;
-        nft_liq_pools[tokenId] = NFTLiquidityPool({
-            nft_liq: default_fraction_count - authorCut,
-            token_liq: default_listing_cost
+        require(_isApprovedOrOwner(address(this), tokenId), "Contract is not an owner or approved address");
+        safeTransferFrom(msg.sender, address(this), tokenId);
+        // Now create a new pool data structure
+        _poolIds.increment();
+        uint256 currentPoolId = _poolIds.current();
+        uint256 authorCut = (DEFAULT_FRACTIONS_COUNT * authorCutPercent)/100;
+        pool_data[currentPoolId] = NFTLiquidityPoolData({
+            tokenId: tokenId,
+            poolId: currentPoolId,
+            exists: true,
+            nft_fractions: DEFAULT_FRACTIONS_COUNT - authorCut,
+            token_liq: msg.value
         });
-        candidates[roundNumber].push(tokenId);
-        is_candidate[roundNumber][tokenId] = true;
-        // Add this listing to the current round
-        round_info[roundNumber][tokenId][msg.sender] = VotePair({
-            vote_count: authorCut,
-            token_count: default_listing_cost
-        });
-        emit ListingEvent(tokenId, roundNumber);
-    }
-
-    function vote(uint256 nftId) _isOngoing public payable {
-        uint256 round_no = roundNumber;
-        uint256 my_token_count = msg.value;
-
-        // Check if nft is listed in the protocol
-        require(
-            is_candidate[round_no][nftId],
-            "NFT is not listed in this round"
-        );
-
-        uint256 current_nft_liq = nft_liq_pools[nftId].nft_liq;
-        uint256 current_token_liq = nft_liq_pools[nftId].token_liq;
-
-        uint256 NFT_constant = current_nft_liq * current_token_liq;
-
-        uint256 my_vote = current_nft_liq -
-            (NFT_constant / (current_token_liq + my_token_count));
-
-        // update the liquidity pool of the nft
-        nft_liq_pools[nftId].nft_liq = current_nft_liq - my_vote;
-        nft_liq_pools[nftId].token_liq = current_token_liq + my_token_count;
-
-        round_info[round_no][nftId][msg.sender].vote_count += my_vote;
-        round_info[round_no][nftId][msg.sender].token_count += my_token_count;
-
-        emit VotedForAnNFTEvent(nftId, msg.sender, my_vote, my_token_count);
-    }
-
-    function startNewRound() public _onlyAdmin {
-        // Require the round to not be ongoing
-        require(block.number >= roundDuration.endBlock, "Round ongoing");
-        calculateWinners();
-        reimburseLosers();
-        roundDuration = Duration({
-            startBlock: block.number,
-            endBlock: block.number + (SECONDS_PER_ROUND/SECONDS_PER_BLOCK)
-        });
-        roundNumber++;
-    }
-    function arrayOfRound(uint roundNo) public view returns (uint256[] memory) {
-    return candidates[roundNo];
-    
+        tokenToPoolMap[tokenId] = currentPoolId;
+        fractionBalances[msg.sender][tokenId] = authorCut;
+        // TODO: Emit relevant event
     }
     
+    function swap(uint256 poolId, uint256 fractionCount) public payable {
+        require(!(msg.value > 0 && fractionCount > 0), "Invalid call. Cannot decide which side");
+        if(msg.value > 0){
+            // Swap FROM MATIC to Fractions
 
-    function calculateWinners() private {
+        } else {
+            // Swap TO MATIC from Fractions
+            require(fractionBalances[msg.sender][pool_data[poolId].tokenId] >= fractionCount, "Not enough fractions in balance");
+
+        }
+    }
+    function stakeToFarm(uint256 farmId) _isValidFarmId(farmId) public {
 
     }
-    function reimburseLosers() private {
+    function unstakeFromFarm(uint256 farmId) _isValidFarmId(farmId) public {
 
     }
+    function claimFarmRewards(uint256 farmId) _isValidFarmId(farmId) public {
+
+    }
+    function makeNewFarm(uint256 tokenId) _onlyAdmin _isValidTokenId(tokenId) public {
+        _farmIds.increment();
+        uint256 newFarmId = _farmIds.current();
+        tokenIdToFarmMap[tokenId] = newFarmId;
+        farm_data[newFarmId] = FarmData({
+            farmId: newFarmId,
+            tokenId: tokenId,
+            exists: true,
+            totalLiquidity: 0
+        });
+    }
+    function addProfitToFarm(uint256 farmId) _isValidFarmId(farmId) public payable {
+
+    }
+    // function vote(uint256 nftId) public payable {
+    //     uint256 my_token_count = msg.value;
+
+    //     uint256 current_nft_liq = nft_liq_pools[nftId].nft_liq;
+    //     uint256 current_token_liq = nft_liq_pools[nftId].token_liq;
+
+    //     uint256 NFT_constant = current_nft_liq * current_token_liq;
+
+    //     uint256 my_vote = current_nft_liq -
+    //         (NFT_constant / (current_token_liq + my_token_count));
+
+    //     // update the liquidity pool of the nft
+    //     nft_liq_pools[nftId].nft_liq = current_nft_liq - my_vote;
+    //     nft_liq_pools[nftId].token_liq = current_token_liq + my_token_count;
+
+
+    //     emit VotedForAnNFTEvent(nftId, msg.sender, my_vote, my_token_count);
+    // }
+
     event MintingEvent(
         uint256 indexed tokenId,
         address indexed owner

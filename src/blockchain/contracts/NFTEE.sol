@@ -54,11 +54,7 @@ contract NFTEE is ERC721URIStorage {
         require(authorCutPercent <= 100, "Cannot claim more than 100%");
         require(msg.sender == ownerOf(tokenId), "Only owner can list an asset");
         require(msg.value == default_listing_cost, "Incorrect amount sent");
-        // require(pToken.allowance(msg.sender, address(this)) > default_listing_cost
-        //         && pToken.balanceOf(msg.sender) > default_listing_cost, "Balance too low or not enough allowance");
-        // Verify balance of lister
-        // require(pToken.balanceOf(msg.sender) > default_listing_cost, "Not enough balance in allowance to list");
-        // Create liquidity pool and push it to current round
+
         uint256 authorCut = (default_fraction_count * authorCutPercent) / 100;
         nft_liq_pools[tokenId] = NFTLiquidityPool({
             nft_liq: default_fraction_count - authorCut,
@@ -86,14 +82,14 @@ contract NFTEE is ERC721URIStorage {
         uint256 current_nft_liq = nft_liq_pools[nftId].nft_liq;
         uint256 current_token_liq = nft_liq_pools[nftId].token_liq;
 
-        uint256 NFT_constant = current_nft_liq + current_token_liq;
+        uint256 NFT_constant = current_nft_liq * current_token_liq;
 
-        uint256 my_vote = (current_nft_liq - NFT_constant) /
-            (current_token_liq - my_token_count);
+        uint256 my_vote = current_nft_liq - (NFT_constant /
+            (current_token_liq + my_token_count));
 
         // update the liquidity pool of the nft
         nft_liq_pools[nftId].nft_liq = current_nft_liq - my_vote;
-        nft_liq_pools[nftId].token_liq = current_token_liq - my_token_count;
+        nft_liq_pools[nftId].token_liq = current_token_liq + my_token_count;
 
         round_info[round_no][nftId][msg.sender] = Pair({
             vote_count: my_vote,

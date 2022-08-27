@@ -30,6 +30,10 @@ contract NFTEE is ERC721URIStorage {
         require(tokenId <= _tokenIds.current(), "Invalid token Id");
         _;
     }
+    modifier _isValidFarmId(uint256 farmId) {
+        require(farmId <= _farmIds.current(), "Invalid farm id");
+        _;
+    }
     struct NFTLiquidityPoolData {
         uint256 tokenId;
         uint256 poolId;
@@ -41,21 +45,24 @@ contract NFTEE is ERC721URIStorage {
         uint256 farmId;
         uint256 tokenId;
         bool exists;
-        // Mapping address to fractions locked
-        mapping(address => uint256) balances;
         // Total amount that is locked inside this farm
         uint256 totalLiquidity;
     }
     // Pool id => NFTLiquidityPoolData
     mapping(uint256 => NFTLiquidityPoolData) public pool_data;
     // tokenId => poolId
-    mapping(uint256 => uint256) tokenToPoolMap;
+    mapping(uint256 => uint256) public tokenToPoolMap;
     // address => tokenId => fractions held
-    mapping(address => mapping(uint256 => uint256)) balances;
+    mapping(address => mapping(uint256 => uint256)) public fractionBalances;
     // Farm id => Farm data
-    mapping(uint256 => FarmData) farm_data;
+    mapping(uint256 => FarmData) public farm_data;
     //  tokenId => farm id
-    mapping(uint256 => uint256) tokenIdToFarmMap;
+    mapping(uint256 => uint256) public tokenIdToFarmMap;
+    // farmid => balance map
+    mapping(uint256 => mapping(address => uint256)) public farmBalances;
+    // farmId => profit balance map
+    mapping(uint256 => mapping(address => uint256)) public farmProfits;
+
     function mint(string calldata _tokenURI) public returns (uint256) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
@@ -83,7 +90,7 @@ contract NFTEE is ERC721URIStorage {
             token_liq: msg.value
         });
         tokenToPoolMap[tokenId] = currentPoolId;
-        balances[msg.sender][tokenId] = authorCut;
+        fractionBalances[msg.sender][tokenId] = authorCut;
         // TODO: Emit relevant event
     }
     
@@ -94,23 +101,31 @@ contract NFTEE is ERC721URIStorage {
 
         } else {
             // Swap TO MATIC from Fractions
-            require(balances[msg.sender][pool_data[poolId].tokenId] >= fractionCount, "Not enough fractions in balance");
+            require(fractionBalances[msg.sender][pool_data[poolId].tokenId] >= fractionCount, "Not enough fractions in balance");
 
         }
     }
-    function stakeToFarm(uint256 farmId) public {
+    function stakeToFarm(uint256 farmId) _isValidFarmId(farmId) public {
 
     }
-    function unstakeFromFarm(uint256 farmId) public {
+    function unstakeFromFarm(uint256 farmId) _isValidFarmId(farmId) public {
 
     }
-    function claimFarmRewards(uint256 farmId) public {
+    function claimFarmRewards(uint256 farmId) _isValidFarmId(farmId) public {
 
     }
-    function makeNewFarm() _onlyAdmin public {
-        
+    function makeNewFarm(uint256 tokenId) _onlyAdmin _isValidTokenId(tokenId) public {
+        _farmIds.increment();
+        uint256 newFarmId = _farmIds.current();
+        tokenIdToFarmMap[tokenId] = newFarmId;
+        farm_data[newFarmId] = FarmData({
+            farmId: newFarmId,
+            tokenId: tokenId,
+            exists: true,
+            totalLiquidity: 0
+        });
     }
-    function addProfitToFarm(uint256 farmId) public payable {
+    function addProfitToFarm(uint256 farmId) _isValidFarmId(farmId) public payable {
 
     }
     // function vote(uint256 nftId) public payable {

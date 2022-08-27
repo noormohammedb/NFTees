@@ -1,20 +1,19 @@
 // contracts/GameItem.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-
+import "./protocolToken.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract NFTEE is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
-
+    ProtocolToken public pToken;
     address private admin;
-
+    
     constructor() ERC721("Nftee", "NTE") {
         admin = msg.sender;
     }
-
     modifier _onlyAdmin() {
         require(msg.sender == admin);
         _;
@@ -51,7 +50,7 @@ contract NFTEE is ERC721URIStorage {
     //     nft_liq_pools[newItemId].token_liq = 20;
     //     return newItemId;
     // }
-    uint256 roundNumber;
+    uint256 public roundNumber;
 
     function mint(string calldata _tokenURI) public returns (uint256) {
         _tokenIds.increment();
@@ -61,19 +60,28 @@ contract NFTEE is ERC721URIStorage {
         return newItemId;
     }
 
-    function list(uint256 tokenId, uint256 authorCutPercent) public {
+    function list(uint256 tokenId, uint256 authorCutPercent) public payable {
         require(authorCutPercent <= 100, "Cannot claim more than 100%");
         require(msg.sender == ownerOf(tokenId), "Only owner can list an asset");
+        require(msg.value == default_listing_cost, "Incorrect amount sent");
+        // require(pToken.allowance(msg.sender, address(this)) > default_listing_cost 
+        //         && pToken.balanceOf(msg.sender) > default_listing_cost, "Balance too low or not enough allowance");
         // Verify balance of lister
-        // require()
+        // require(pToken.balanceOf(msg.sender) > default_listing_cost, "Not enough balance in allowance to list");
         // Create liquidity pool and push it to current round
         uint256 authorCut = (default_fraction_count * authorCutPercent) / 100;
         nft_liq_pools[tokenId] = NFTLiquidityPool({
             nft_liq: default_fraction_count - authorCut,
             token_liq: default_listing_cost
         });
+        pToken.transferFrom(msg.sender, address(this), default_listing_cost);
         candidates[roundNumber].push(tokenId);
         is_candidate[roundNumber][tokenId] = true;
+        // Add this listing to the current round
+        round_info[roundNumber][tokenId][msg.sender] = Pair({
+            vote_count: authorCut,
+            token_count: default_listing_cost
+        });
     }
 
     // ----------------------------------------------------

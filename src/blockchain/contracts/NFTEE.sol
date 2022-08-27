@@ -1,12 +1,17 @@
 // contracts/GameItem.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract NFTEE is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
+
+    uint256 public constant SECONDS_PER_BLOCK = 2;
+    uint256 public constant SECONDS_PER_ROUND = 30;
+    uint256 public constant WINNERS_PER_ROUND = 2;
     address private admin;
 
     constructor() ERC721("Nftee", "NTE") {
@@ -17,10 +22,17 @@ contract NFTEE is ERC721URIStorage {
         require(msg.sender == admin);
         _;
     }
+    modifier _isOngoing() {
+        require(block.number >= roundDuration.startBlock && block.number < roundDuration.endBlock, "No round is ongoing. Please wait");
+        _;
+    }
     uint256 public default_listing_cost = 20;
     uint256 public default_fraction_count = 10_000;
-
-    struct Pair {
+    struct Duration{
+        uint256 startBlock;
+        uint256 endBlock;
+    }
+    struct VotePair {
         uint256 vote_count;
         uint256 token_count;
     }
@@ -37,10 +49,11 @@ contract NFTEE is ERC721URIStorage {
     mapping(uint256 => NFTLiquidityPool) public nft_liq_pools;
 
     // round_no => nft id => voter address => pair { vote and tokens }
-    mapping(uint256 => mapping(uint256 => mapping(address => Pair)))
+    mapping(uint256 => mapping(uint256 => mapping(address => VotePair)))
         public round_info;
 
     uint256 public roundNumber;
+    Duration public roundDuration;
 
     function mint(string calldata _tokenURI) public payable returns (uint256) {
         _tokenIds.increment();
@@ -51,7 +64,7 @@ contract NFTEE is ERC721URIStorage {
         return newItemId;
     }
 
-    function list(uint256 tokenId, uint256 authorCutPercent) public payable {
+    function list(uint256 tokenId, uint256 authorCutPercent) _isOngoing public payable {
         require(authorCutPercent <= 100, "Cannot claim more than 100%");
         require(msg.sender == ownerOf(tokenId), "Only owner can list an asset");
         // require(msg.value == default_listing_cost, "Incorrect amount sent");
@@ -64,13 +77,14 @@ contract NFTEE is ERC721URIStorage {
         candidates[roundNumber].push(tokenId);
         is_candidate[roundNumber][tokenId] = true;
         // Add this listing to the current round
-        round_info[roundNumber][tokenId][msg.sender] = Pair({
+        round_info[roundNumber][tokenId][msg.sender] = VotePair({
             vote_count: authorCut,
             token_count: default_listing_cost
         });
+        emit ListingEvent(tokenId, roundNumber);
     }
 
-    function vote(uint256 nftId) public payable {
+    function vote(uint256 nftId) _isOngoing public payable {
         uint256 round_no = roundNumber;
         uint256 my_token_count = msg.value;
 
@@ -85,36 +99,49 @@ contract NFTEE is ERC721URIStorage {
 
         uint256 NFT_constant = current_nft_liq * current_token_liq;
 
-        uint256 my_vote = current_nft_liq - (NFT_constant /
-            (current_token_liq + my_token_count));
+        uint256 my_vote = current_nft_liq -
+            (NFT_constant / (current_token_liq + my_token_count));
 
         // update the liquidity pool of the nft
         nft_liq_pools[nftId].nft_liq = current_nft_liq - my_vote;
         nft_liq_pools[nftId].token_liq = current_token_liq + my_token_count;
 
-        round_info[round_no][nftId][msg.sender] = Pair({
-            vote_count: my_vote,
-            token_count: my_token_count
-        });
+        round_info[round_no][nftId][msg.sender].vote_count += my_vote;
+        round_info[round_no][nftId][msg.sender].token_count += my_token_count;
 
         emit VotedForAnNFTEvent(nftId, msg.sender, my_vote, my_token_count);
     }
 
-    function update_round() private _onlyAdmin {
+    function startNewRound() public _onlyAdmin {
+        // Require the round to not be ongoing
+        require(block.number >= roundDuration.endBlock, "Round ongoing");
+        calculateWinners();
+        reimburseLosers();
+        roundDuration = Duration({
+            startBlock: block.number,
+            endBlock: block.number + (SECONDS_PER_ROUND/SECONDS_PER_BLOCK)
+        });
         roundNumber++;
     }
     function foo(uint roundNo) public view returns (uint256[] memory) {
     return candidates[roundNo];
     
     }
+    
+
+    function calculateWinners() private {
+
+    }
+    function reimburseLosers() private {
+
+    }
     event MintingEvent(
-        uint256 tokenId,
-        address owner
+        uint256 indexed tokenId,
+        address indexed owner
     );
     event ListingEvent(
         uint256 indexed nftId,
-        uint256 indexed authorCutPercent,
-        uint256 roundNumber
+        uint256 indexed roundNumber
     );
 
     event VotedForAnNFTEvent(

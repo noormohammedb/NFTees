@@ -9,6 +9,7 @@ contract NFTEE is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     Counters.Counter private _poolIds;
+    Counters.Counter private _farmIds; 
     uint256 public constant SECONDS_PER_BLOCK = 2;
     uint256 public constant SECONDS_PER_ROUND = 30;
     uint256 public constant WINNERS_PER_ROUND = 2;
@@ -29,6 +30,10 @@ contract NFTEE is ERC721URIStorage {
         require(tokenId <= _tokenIds.current(), "Invalid token Id");
         _;
     }
+    modifier _isValidFarmId(uint256 farmId) {
+        require(farmId <= _farmIds.current(), "Invalid farm id");
+        _;
+    }
     struct NFTLiquidityPoolData {
         uint256 tokenId;
         uint256 poolId;
@@ -36,11 +41,31 @@ contract NFTEE is ERC721URIStorage {
         uint256 nft_fractions;
         uint256 token_liq;
     }
+    struct FarmData {
+        uint256 farmId;
+        uint256 tokenId;
+        bool exists;
+        // Total amount that is locked inside this farm
+        uint256 totalLiquidity;
+    }
     // Pool id => NFTLiquidityPoolData
     mapping(uint256 => NFTLiquidityPoolData) public pool_data;
     // tokenId => poolId
-    mapping(uint256 => uint256) tokenToPoolMap;
+    mapping(uint256 => uint256) public tokenToPoolMap;
+    // address => tokenId => fractions held
+    mapping(address => mapping(uint256 => uint256)) public fractionBalances;
+    // Farm id => Farm data
+    mapping(uint256 => FarmData) public farm_data;
+    //  tokenId => farm id
+    mapping(uint256 => uint256) public tokenIdToFarmMap;
+    // farmid => balance map
+    mapping(uint256 => mapping(address => uint256)) public farmBalances;
+    // farmId => profit balance map
+    mapping(uint256 => mapping(address => uint256)) public farmProfits;
 
+    function lastTokenId() public view returns (uint256) {
+        return _tokenIds.current();
+    }
     function mint(string calldata _tokenURI) public returns (uint256) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
@@ -49,7 +74,7 @@ contract NFTEE is ERC721URIStorage {
         emit MintingEvent(newItemId, msg.sender);
         return newItemId;
     }
-
+    
     function createPool(uint256 tokenId, uint256 authorCutPercent) _isValidTokenId(tokenId) public payable {
         require(authorCutPercent <= 100, "Cannot claim more than 100%");
         require(msg.value < MINIMUM_INITIAL_LIQUIDITY, "No initial liquidity provided");
@@ -68,9 +93,44 @@ contract NFTEE is ERC721URIStorage {
             token_liq: msg.value
         });
         tokenToPoolMap[tokenId] = currentPoolId;
+        fractionBalances[msg.sender][tokenId] = authorCut;
         // TODO: Emit relevant event
     }
+    
+    function swap(uint256 poolId, uint256 fractionCount) public payable {
+        require(!(msg.value > 0 && fractionCount > 0), "Invalid call. Cannot decide which side");
+        if(msg.value > 0){
+            // Swap FROM MATIC to Fractions
 
+        } else {
+            // Swap TO MATIC from Fractions
+            require(fractionBalances[msg.sender][pool_data[poolId].tokenId] >= fractionCount, "Not enough fractions in balance");
+
+        }
+    }
+    function stakeToFarm(uint256 farmId) _isValidFarmId(farmId) public {
+
+    }
+    function unstakeFromFarm(uint256 farmId) _isValidFarmId(farmId) public {
+
+    }
+    function claimFarmRewards(uint256 farmId) _isValidFarmId(farmId) public {
+
+    }
+    function makeNewFarm(uint256 tokenId) _onlyAdmin _isValidTokenId(tokenId) public {
+        _farmIds.increment();
+        uint256 newFarmId = _farmIds.current();
+        tokenIdToFarmMap[tokenId] = newFarmId;
+        farm_data[newFarmId] = FarmData({
+            farmId: newFarmId,
+            tokenId: tokenId,
+            exists: true,
+            totalLiquidity: 0
+        });
+    }
+    function addProfitToFarm(uint256 farmId) _isValidFarmId(farmId) public payable {
+
+    }
     // function vote(uint256 nftId) public payable {
     //     uint256 my_token_count = msg.value;
 

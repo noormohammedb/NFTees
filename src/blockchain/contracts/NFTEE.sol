@@ -115,6 +115,7 @@ contract NFTEE is ERC721URIStorage {
         );
         uint256 NFT_constant = pool_data[poolId].nft_fractions *
             pool_data[poolId].token_liq;
+        uint256 farmId = tokenIdToFarmMap[pool_data[poolId].tokenId];
 
         if (msg.value > 0) {
             // Swap FROM MATIC to Fractions
@@ -129,7 +130,13 @@ contract NFTEE is ERC721URIStorage {
         }
     }
 
-    function stakeToFarm(uint256 farmId) public _isValidFarmId(farmId) {
+    function stakeToFarm(uint256 farmId) public payable _isValidFarmId(farmId) {
+        uint256 tokenId = farm_data[farmId].tokenId;
+        // farmId=>FarmData{tokenId} tokenId => poolId
+        uint256 poolId = tokenToPoolMap[tokenId];
+        uint256 NFT_constant = pool_data[poolId].nft_fractions *
+            pool_data[poolId].token_liq;
+
         uint256 fraction_i_get = pool_data[poolId].nft_fractions -
             (NFT_constant / (msg.value - pool_data[poolId].token_liq));
 
@@ -137,7 +144,8 @@ contract NFTEE is ERC721URIStorage {
         pool_data[poolId].nft_fractions -= fraction_i_get;
         pool_data[poolId].token_liq += msg.value;
 
-        balances[msg.sender][poolId] += fraction_i_get;
+        fractionBalances[msg.sender][tokenId] += fraction_i_get;
+        // TODO: Emit relevant event
     }
 
     function unstakeFromFarm(uint256 farmId) public _isValidFarmId(farmId) {}

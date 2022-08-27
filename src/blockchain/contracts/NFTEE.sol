@@ -9,46 +9,46 @@ contract NFTEE is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
+
+    address private admin;
     constructor() ERC721("Nftee", "NTE") {
-        // _tokenIds = new Counters.(1);
+        admin = msg.sender;
     }
-
+    modifier _onlyAdmin {
+        require(msg.sender == admin);
+        _;
+    }
     uint256 listing_cost = 20;
-    uint256 defautl_fractions = 100;
-
-    struct NFT_liquidity_pool {
-        // some data about the NFT
-
-        // uint256 initial_liqidity;
-        uint256 nft_liquidity;
-        uint256 token_liquidity;
+    uint256 default_fractions = 100;
+    
+    struct Pair {
+        uint256 vote_count;
+        uint256 token_count;
+    }
+    struct NFTLiquidityPool {
+        uint256 nft_liq;
+        uint256 token_liq;
     }
 
-    mapping(uint256 => NFT_liquidity_pool) nft_liquidity_pools;
+    // Round number => list of candidate tokenIds
+    mapping(uint256 => uint256[]) candidates;
+    // Round number => tokenId => Whether it is listed in the protocol
+    mapping(uint256 => mapping(uint256 => bool)) isCandidate;
+    // NFT tokenId => NFTLiquidityPool
+    mapping(uint256 => NFTLiquidityPool) nft_liq_pools;
 
-    struct pair {
-        uint256 no_of_votes;
-        uint256 no_of_tokens;
-    }
+    // round_no => nft id => voter address => pair { vote and tokens }
+    mapping(uint256 => mapping(address => mapping(uint256 => Pair))) round_info;
 
-    // round_no => voter => nft id => pair { vote and tokens }
-    mapping(uint256 => mapping(address => mapping(uint256 => pair))) round_info;
+    uint256 roundNumber;
 
-    uint256[] round_numbers;
-
-    function mint(uint256 initial_liq) public returns (uint256) {
-        // _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
-
-        nft_data[newItemId].nft_liquidity = initial_liq;
-        nft_data[newItemId].remaining_vote = defautl_fraction;
-
-        _mint(msg.sender, newItemId);
-
+    function mint() public returns (uint256) {
         _tokenIds.increment();
+        uint256 newItemId = _tokenIds.current();
+        _mint(msg.sender, newItemId);
         return newItemId;
     }
-
+    // ----------------------------------------------------
     function vote(uint256 nftId, uint256 token) public {
         uint256 round_no = current_round();
 

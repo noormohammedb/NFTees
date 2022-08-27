@@ -1,14 +1,12 @@
 // contracts/GameItem.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract NFTEE is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
-
     address private admin;
 
     constructor() ERC721("Nftee", "NTE") {
@@ -32,16 +30,17 @@ contract NFTEE is ERC721URIStorage {
     }
 
     // Round number => list of candidate tokenIds
-    mapping(uint256 => uint256[]) candidates;
+    mapping(uint256 => uint256[]) public candidates;
     // Round number => tokenId => Whether it is listed in the protocol
-    mapping(uint256 => mapping(uint256 => bool)) is_candidate;
+    mapping(uint256 => mapping(uint256 => bool)) public is_candidate;
     // NFT tokenId => NFTLiquidityPool
-    mapping(uint256 => NFTLiquidityPool) nft_liq_pools;
+    mapping(uint256 => NFTLiquidityPool) public nft_liq_pools;
 
     // round_no => nft id => voter address => pair { vote and tokens }
-    mapping(uint256 => mapping(uint256 => mapping(address => Pair))) round_info;
+    mapping(uint256 => mapping(uint256 => mapping(address => Pair)))
+        public round_info;
 
-    uint256 roundNumber;
+    uint256 public roundNumber;
 
     function mint(string calldata _tokenURI) public returns (uint256) {
         _tokenIds.increment();
@@ -51,11 +50,14 @@ contract NFTEE is ERC721URIStorage {
         return newItemId;
     }
 
-    function list(uint256 tokenId, uint256 authorCutPercent) public {
+    function list(uint256 tokenId, uint256 authorCutPercent) public payable {
         require(authorCutPercent <= 100, "Cannot claim more than 100%");
         require(msg.sender == ownerOf(tokenId), "Only owner can list an asset");
+        require(msg.value == default_listing_cost, "Incorrect amount sent");
+        // require(pToken.allowance(msg.sender, address(this)) > default_listing_cost
+        //         && pToken.balanceOf(msg.sender) > default_listing_cost, "Balance too low or not enough allowance");
         // Verify balance of lister
-        // require()
+        // require(pToken.balanceOf(msg.sender) > default_listing_cost, "Not enough balance in allowance to list");
         // Create liquidity pool and push it to current round
         uint256 authorCut = (default_fraction_count * authorCutPercent) / 100;
         nft_liq_pools[tokenId] = NFTLiquidityPool({
@@ -64,6 +66,11 @@ contract NFTEE is ERC721URIStorage {
         });
         candidates[roundNumber].push(tokenId);
         is_candidate[roundNumber][tokenId] = true;
+        // Add this listing to the current round
+        round_info[roundNumber][tokenId][msg.sender] = Pair({
+            vote_count: authorCut,
+            token_count: default_listing_cost
+        });
     }
 
     function vote(uint256 nftId) public payable {

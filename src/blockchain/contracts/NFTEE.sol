@@ -107,13 +107,15 @@ contract NFTEE is ERC721URIStorage {
             !(msg.value > 0 && fractionCount > 0),
             "Invalid call. Cannot decide which side"
         );
-        uint256 NFT_constant = pool_data[poolId].nft_fractions *
+        uint256 POOL_CONST = pool_data[poolId].nft_fractions *
             pool_data[poolId].token_liq;
-        uint256 farmId = tokenIdToFarmMap[pool_data[poolId].tokenId];
-
+        NFTLiquidityPoolData memory pData = pool_data[poolId];
         if (msg.value > 0) {
             // Swap FROM MATIC to Fractions
-            stakeToFarm(farmId);
+            uint256 fractions = pData.nft_fractions - (POOL_CONST/(pData.token_liq + msg.value));
+            pool_data[poolId].nft_fractions -= fractions;
+            pool_data[poolId].token_liq += msg.value;
+            fractionBalances[msg.sender][pData.tokenId] += fractions;
         } else {
             // Swap TO MATIC from Fractions
             require(
@@ -121,7 +123,11 @@ contract NFTEE is ERC721URIStorage {
                     fractionCount,
                 "Not enough fractions in balance"
             );
-            unstakeFromFarm(farmId, fractionCount);
+            uint256 tokens = pData.token_liq - (POOL_CONST/(pData.nft_fractions + fractionCount));
+            pool_data[poolId].token_liq -= tokens;
+            payable(msg.sender).transfer(tokens);
+            pool_data[poolId].nft_fractions += fractionCount;
+            fractionBalances[msg.sender][pData.tokenId] -= fractionCount;
         }
     }
 
@@ -148,6 +154,7 @@ contract NFTEE is ERC721URIStorage {
         public
         _isValidFarmId(farmId)
     {
+        
         // farmId=>FarmData{tokenId}
         uint256 tokenId = farm_data[farmId].tokenId;
         // tokenId => poolId

@@ -60,6 +60,7 @@ contract NFTEE is ERC721URIStorage {
         uint256 newItemId = _tokenIds.current();
         _mint(msg.sender, newItemId);
         _setTokenURI(newItemId, _tokenURI);
+        emit MintingEvent(newItemId, msg.sender);
         return newItemId;
     }
 
@@ -129,6 +130,10 @@ contract NFTEE is ERC721URIStorage {
     function reimburseLosers() private {
 
     }
+    event MintingEvent(
+        uint256 indexed tokenId,
+        address indexed owner
+    );
     event ListingEvent(
         uint256 indexed nftId,
         uint256 indexed roundNumber

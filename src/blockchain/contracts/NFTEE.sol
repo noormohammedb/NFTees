@@ -127,6 +127,7 @@ contract NFTEE is ERC721URIStorage {
                     fractionCount,
                 "Not enough fractions in balance"
             );
+            unstakeFromFarm(farmId, fractionCount);
         }
     }
 
@@ -134,6 +135,7 @@ contract NFTEE is ERC721URIStorage {
         uint256 tokenId = farm_data[farmId].tokenId;
         // farmId=>FarmData{tokenId} tokenId => poolId
         uint256 poolId = tokenToPoolMap[tokenId];
+
         uint256 NFT_constant = pool_data[poolId].nft_fractions *
             pool_data[poolId].token_liq;
 
@@ -148,7 +150,32 @@ contract NFTEE is ERC721URIStorage {
         // TODO: Emit relevant event
     }
 
-    function unstakeFromFarm(uint256 farmId) public _isValidFarmId(farmId) {}
+    function unstakeFromFarm(uint256 farmId, uint256 fractionCount)
+        public
+        _isValidFarmId(farmId)
+    {
+        // farmId=>FarmData{tokenId}
+        uint256 tokenId = farm_data[farmId].tokenId;
+        // tokenId => poolId
+        uint256 poolId = tokenToPoolMap[tokenId];
+
+        uint256 NFT_constant = pool_data[poolId].nft_fractions *
+            pool_data[poolId].token_liq;
+
+        uint256 fraction_i_have = fractionBalances[msg.sender][tokenId];
+
+        uint256 matic_i_get_ = (NFT_constant /
+            (pool_data[poolId].nft_fractions - fraction_i_have) -
+            pool_data[poolId].token_liq);
+
+        // update the pool data
+        pool_data[poolId].token_liq -= matic_i_get_;
+        pool_data[poolId].nft_fractions += fraction_i_have;
+        fractionBalances[msg.sender][tokenId] -= fraction_i_have;
+        /* TODO: Emit relevant event
+            Transfer the matic to the withdrawer needs RnD to figure out
+        */
+    }
 
     function claimFarmRewards(uint256 farmId) public _isValidFarmId(farmId) {}
 

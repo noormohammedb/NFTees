@@ -385,7 +385,7 @@ const CreateNewContent = () => {
                         className="btn btn-warning btn-sm rounded-pill"
                         to="#"
                       >
-                        Place bid
+                        Create Pool
                       </button>
                     </div>
                     <div className="col-6 text-end">

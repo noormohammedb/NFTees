@@ -59,7 +59,7 @@ function App() {
   return (
     <div className="App">
       <Routes>
-        <Route path="/" index element={<DemoPage />} />
+        <Route path="/" index element={<HomeOne />} />
         <Route path="/home1" element={<HomeOne />} />
         <Route path="/home2" element={<HomeTwo />} />
 

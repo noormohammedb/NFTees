@@ -52,7 +52,7 @@ export default function Header() {
               {/* Create New Button */}
               <CreateNewButton
                 buttonColor="btn-warning"
-                buttonURL="/create-new"
+                buttonURL="/connect-wallet"
                 buttonText="Create New"
               />
             </div>

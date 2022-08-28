@@ -138,11 +138,11 @@ const LiveBidding = () => {
 
             {/* Bid End */}
             {/* <Countdown date={elem.bidEndsTime} intervalDelay={0} renderer={clockTime} /> */}
-            <Countdown
+            {/* <Countdown
               date="April 24, 2023 00:00:00"
               intervalDelay={0}
               renderer={clockTime}
-            />
+            /> */}
           </div>
 
           {/* Others Info */}

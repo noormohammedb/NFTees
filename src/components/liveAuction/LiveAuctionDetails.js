@@ -410,7 +410,7 @@ const LiveAuctionDetails = () => {
             <div className="col-12">
               <Link
                 className={`btn btn-primary rounded-pill btn-sm mt-3 w-100`}
-                to="#"
+                to={`/live-bid/${elem.tokenId}`}
               >
                 {/* <i className={`bi ${elem.buttonInfo[0].icon} me-1`}></i> */}
                 Place Bid
@@ -419,7 +419,7 @@ const LiveAuctionDetails = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   ));
 
   return (

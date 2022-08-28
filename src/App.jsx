@@ -94,7 +94,7 @@ function App() {
         <Route path="/activity" element={<Activity />} />
         <Route path="/ranking" element={<RankingTable />} />
         <Route path="/create-new" element={<CreateNew />} />
-        <Route path="/connet-wallet" element={<ConnectWallet />} />
+        <Route path="/connect-wallet" element={<ConnectWallet />} />
         <Route path="/author/:AUTHORUSERNAME" element={<Author />} />
 
         <Route path="/register" element={<Register />} />

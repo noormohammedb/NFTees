@@ -82,7 +82,10 @@ contract NFTEE is ERC721URIStorage {
         _isValidTokenId(tokenId)
     {
         require(authorCutPercent <= 100, "Cannot claim more than 100%");
-        require(msg.value > MINIMUM_INITIAL_LIQUIDITY, "No initial liquidity provided");
+        require(
+            msg.value > MINIMUM_INITIAL_LIQUIDITY,
+            "No initial liquidity provided"
+        );
         require(msg.sender == ownerOf(tokenId), "Only owner can list an asset");
         // require(_isApprovedOrOwner(address(this), tokenId), "Contract is not an owner or approved address");
         transferFrom(msg.sender, address(this), tokenId);
@@ -112,7 +115,8 @@ contract NFTEE is ERC721URIStorage {
         NFTLiquidityPoolData memory pData = pool_data[poolId];
         if (msg.value > 0) {
             // Swap FROM MATIC to Fractions
-            uint256 fractions = pData.nft_fractions - (POOL_CONST/(pData.token_liq + msg.value));
+            uint256 fractions = pData.nft_fractions -
+                (POOL_CONST / (pData.token_liq + msg.value));
             pool_data[poolId].nft_fractions -= fractions;
             pool_data[poolId].token_liq += msg.value;
             fractionBalances[msg.sender][pData.tokenId] += fractions;
@@ -123,7 +127,8 @@ contract NFTEE is ERC721URIStorage {
                     fractionCount,
                 "Not enough fractions in balance"
             );
-            uint256 tokens = pData.token_liq - (POOL_CONST/(pData.nft_fractions + fractionCount));
+            uint256 tokens = pData.token_liq -
+                (POOL_CONST / (pData.nft_fractions + fractionCount));
             pool_data[poolId].token_liq -= tokens;
             payable(msg.sender).transfer(tokens);
             pool_data[poolId].nft_fractions += fractionCount;
@@ -131,9 +136,15 @@ contract NFTEE is ERC721URIStorage {
         }
     }
 
-    function stakeToFarm(uint256 farmId, uint256 fractionCount) public _isValidFarmId(farmId) {
+    function stakeToFarm(uint256 farmId, uint256 fractionCount)
+        public
+        _isValidFarmId(farmId)
+    {
         uint256 tokenId = farm_data[farmId].tokenId;
-        require(fractionCount <= fractionBalances[msg.sender][tokenId], "Insufficient fraction balance");
+        require(
+            fractionCount <= fractionBalances[msg.sender][tokenId],
+            "Insufficient fraction balance"
+        );
 
         fractionBalances[msg.sender][tokenId] -= fractionCount;
         farmBalances[farmId][msg.sender] += fractionCount;
@@ -146,7 +157,10 @@ contract NFTEE is ERC721URIStorage {
         _isValidFarmId(farmId)
     {
         uint256 tokenId = farm_data[farmId].tokenId;
-        require(farmBalances[tokenId][msg.sender] >= fractionCount, "Not enough balance in farm");
+        require(
+            farmBalances[tokenId][msg.sender] >= fractionCount,
+            "Not enough balance in farm"
+        );
         farmBalances[tokenId][msg.sender] -= fractionCount;
         farm_data[farmId].totalLiquidity -= fractionCount;
         fractionBalances[msg.sender][tokenId] += fractionCount;
@@ -178,24 +192,6 @@ contract NFTEE is ERC721URIStorage {
         payable
         _isValidFarmId(farmId)
     {}
-
-    // function vote(uint256 nftId) public payable {
-    //     uint256 my_token_count = msg.value;
-
-    //     uint256 current_nft_liq = nft_liq_pools[nftId].nft_liq;
-    //     uint256 current_token_liq = nft_liq_pools[nftId].token_liq;
-
-    //     uint256 NFT_constant = current_nft_liq * current_token_liq;
-
-    //     uint256 my_vote = current_nft_liq -
-    //         (NFT_constant / (current_token_liq + my_token_count));
-
-    //     // update the liquidity pool of the nft
-    //     nft_liq_pools[nftId].nft_liq = current_nft_liq - my_vote;
-    //     nft_liq_pools[nftId].token_liq = current_token_liq + my_token_count;
-
-    //     emit VotedForAnNFTEvent(nftId, msg.sender, my_vote, my_token_count);
-    // }
 
     event MintingEvent(uint256 indexed tokenId, address indexed owner);
     event ListingEvent(uint256 indexed nftId, uint256 indexed roundNumber);

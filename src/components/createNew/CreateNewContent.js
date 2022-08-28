@@ -135,7 +135,7 @@ const CreateNewContent = () => {
       tokenRes,
       5, //create a state for this
       {
-        value: ethers.utils.parseUnits("25", "ether"),
+        value: ethers.utils.parseUnits("0.005", "ether"),
       }
     );
     // const res2 = await transaction2.wait();

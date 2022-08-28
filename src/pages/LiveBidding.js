@@ -35,7 +35,7 @@ const LiveBidding = () => {
   }
   async function loadNFTs() {
     /* create a generic provider and query for unsold market items */
-    const provider = new ethers.providers.JsonRpcProvider();
+    const provider = new ethers.providers.JsonRpcProvider("https://matic-mumbai.chainstacklabs.com");
     const contract = new ethers.Contract(nftAddress, NFTEE.abi, provider);
     const TokenIds = await contract.lastTokenId();
     console.log("TokenIds", TokenIds);
@@ -214,7 +214,7 @@ const LiveBidding = () => {
                 to={`/live-bid/${elem.tokenId}`}
               >
                 {/* <i className={`bi ${elem.buttonInfo[0].icon} me-1`} ></i> */}
-                Place Bid
+                Swap Now
               </Link>
             </div>
           </div>

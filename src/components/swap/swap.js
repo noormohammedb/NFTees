@@ -35,8 +35,8 @@ const Swap = (props) => {
       var fractions =
         pooldata.nft_fractions.toNumber() -
         pool_const /
-          (Number(ethers.utils.formatEther(pooldata.token_liq)) +
-            Number(inputmatic));
+        (Number(ethers.utils.formatEther(pooldata.token_liq)) +
+          Number(inputmatic));
       // console.log('pool_const: ', pool_const);
       // console.log(
       //   "ethers.utils.formatEther(pooldata.token_liq): ",
@@ -83,7 +83,6 @@ const Swap = (props) => {
       <div class="section uniswapSection">
         <div class="uniswap">
           <div class="uniswapHead">
-            <div class="title">Trade</div>
             {/* <input id="uniswapSettingsTrigger" hidden type="checkbox" />
             <div class="buttons">
               <label for="uniswapSettingsTrigger">

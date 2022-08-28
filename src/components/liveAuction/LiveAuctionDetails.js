@@ -35,11 +35,11 @@ const LiveAuctionDetails = () => {
   }, []);
   async function loadNFTs() {
     /* create a generic provider and query for unsold market items */
-    const provider = new ethers.providers.JsonRpcProvider();
+    const provider = new ethers.providers.JsonRpcProvider("https://matic-mumbai.chainstacklabs.com");
     const contract = new ethers.Contract(nftAddress, NFTEE.abi, provider);
     const TokenIds = await contract.lastTokenId();
     const poolId = await contract.tokenToPoolMap(TokenIds.toNumber());
-    
+
     console.log("TokenIds", TokenIds.toNumber());
     console.log("poolId", poolId.toNumber());
     for (var i = 1; i <= TokenIds; i++) {

@@ -26,6 +26,7 @@ const LiveAuctionDetails = () => {
   const bidsdata = bidDetailsData[0];
   console.log(typeof bidsdata);
   const [TokenIds, setTokenIds] = useState(0);
+  const [poolId, setPoolId] = useState(0);
   const data = [];
   const [nfts, setNfts] = useState([]);
   const [loadingState, setLoadingState] = useState("not-loaded");
@@ -37,15 +38,16 @@ const LiveAuctionDetails = () => {
     const provider = new ethers.providers.JsonRpcProvider();
     const contract = new ethers.Contract(nftAddress, NFTEE.abi, provider);
     const TokenIds = await contract.lastTokenId();
-    console.log("TokenIds", TokenIds);
-    setTokenIds(TokenIds.toNumber());
+    const poolId = await contract.tokenToPoolMap(TokenIds.toNumber());
+    
     console.log("TokenIds", TokenIds.toNumber());
+    console.log("poolId", poolId.toNumber());
     for (var i = 1; i <= TokenIds; i++) {
       console.log(i);
       data.push(i);
     }
     console.log("data", data);
-
+    setPoolId(poolId.toNumber());
 
     /*
      *  map over items returned from smart contract and format
@@ -522,7 +524,7 @@ const LiveAuctionDetails = () => {
                   intervalDelay={0}
                   renderer={clockTime}
                 /> */}
-                <Swap />
+                <Swap nftdata={nftdata} poolId={poolId} />
 
                 <div className="border-top w-75 my-4" />
 

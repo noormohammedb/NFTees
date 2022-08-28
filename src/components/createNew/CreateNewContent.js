@@ -385,7 +385,7 @@ const CreateNewContent = () => {
                         className="btn btn-warning btn-sm rounded-pill"
                         to="#"
                       >
-                        Place bid
+                        Create Pool
                       </button>
                     </div>
                     <div className="col-6 text-end">
@@ -393,8 +393,7 @@ const CreateNewContent = () => {
                         className="btn btn-minimal btn-sm hover-primary"
                         to="#"
                       >
-                        <i className="bi bi-activity me-1" />
-                        Activity
+                        <input type="text" placeholder="25" />
                       </Link>
                     </div>
                   </div>
@@ -411,7 +410,7 @@ const CreateNewContent = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

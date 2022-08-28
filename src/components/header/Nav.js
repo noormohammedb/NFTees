@@ -6,10 +6,11 @@ export default function FuntoNavbar() {
       <NavLink to="/home1" className="ft-dd" title="Home" id="Home">
         Home
       </NavLink>
-      {/* <NavLink to="/dashboard" className="ft-dd" title="Home" id="Home">Dashboard</NavLink> */}
+      <NavLink to="/farm" className="ft-dd" title="Home" id="Home">Farm NFTs</NavLink>
       <NavLink to="/create-new" className="ft-dd" title="Home" id="Home">
         Mint NFT
       </NavLink>
+      <NavLink to="/live-bidding" className="ft-dd" title="Home" id="Home">Current Listings</NavLink>
     </div>
   );
 }

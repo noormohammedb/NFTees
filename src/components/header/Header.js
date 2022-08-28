@@ -23,7 +23,7 @@ export default function Header() {
         <Container>
           {/* Navbar Brand */}
           <Link className="navbar-brand" to="/">
-            <img
+            {/* <img
               className="light-logo"
               src={`${process.env.PUBLIC_URL}/${brandLogo}`}
               alt="Light"
@@ -32,7 +32,8 @@ export default function Header() {
               className="dark-logo"
               src={`${process.env.PUBLIC_URL}/${darkLogo}`}
               alt="Dark"
-            />
+            /> */}
+            <h1 className="text-white">NFTees</h1>
           </Link>
 
           {/* Navbar Toggler */}
@@ -45,9 +46,7 @@ export default function Header() {
 
             {/* Header Meta */}
             <div className="header-meta d-flex align-items-center ms-lg-auto">
-              <NavLink to="/dashboard" className="ft-dd" title="Home" id="Home">
-                Dashboard
-              </NavLink>
+              <SearchForm />
 
               {/* Create New Button */}
               <CreateNewButton

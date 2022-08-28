@@ -14,188 +14,188 @@ window.jQuery = window.$ = $;
 require("jquery-nice-select");
 
 const ExploreOne = () => {
-    const [count, setCount] = useState(12);
-    const [noMorePost, setNoMorePost] = useState(false);
-    const countSlice = DiscoverNFTData.slice(0, count);
+  const [count, setCount] = useState(12);
+  const [noMorePost, setNoMorePost] = useState(false);
+  const countSlice = DiscoverNFTData.slice(0, count);
 
-    const selectStatus = useRef();
-    const selectCategories = useRef();
-    const selectItems = useRef();
-    const selectISortBy = useRef();
-    const selectRatings = useRef();
-    const selectChains = useRef();
-    const selectChains2 = useRef();
+  const selectStatus = useRef();
+  const selectCategories = useRef();
+  const selectItems = useRef();
+  const selectISortBy = useRef();
+  const selectRatings = useRef();
+  const selectChains = useRef();
+  const selectChains2 = useRef();
 
-    useEffect(() => {
-      $(selectStatus.current).niceSelect();
-    }, []);
+  useEffect(() => {
+    $(selectStatus.current).niceSelect();
+  }, []);
 
-    useEffect(() => {
-      $(selectCategories.current).niceSelect();
-    }, []);
+  useEffect(() => {
+    $(selectCategories.current).niceSelect();
+  }, []);
 
-    useEffect(() => {
-      $(selectItems.current).niceSelect();
-    }, []);
+  useEffect(() => {
+    $(selectItems.current).niceSelect();
+  }, []);
 
-    useEffect(() => {
-      $(selectISortBy.current).niceSelect();
-    }, []);
+  useEffect(() => {
+    $(selectISortBy.current).niceSelect();
+  }, []);
 
-    useEffect(() => {
-      $(selectRatings.current).niceSelect();
-    }, []);
+  useEffect(() => {
+    $(selectRatings.current).niceSelect();
+  }, []);
 
-    useEffect(() => {
-      $(selectChains.current).niceSelect();
-    }, []);
+  useEffect(() => {
+    $(selectChains.current).niceSelect();
+  }, []);
 
-    useEffect(() => {
-      $(selectChains2.current).niceSelect();
-    }, []);
+  useEffect(() => {
+    $(selectChains2.current).niceSelect();
+  }, []);
 
-    const handleLoadMore = () => {
-        setCount(count + 4);
-        if(count >= DiscoverNFTData.length) {
-            setNoMorePost(true);
-        }
+  const handleLoadMore = () => {
+    setCount(count + 4);
+    if (count >= DiscoverNFTData.length) {
+      setNoMorePost(true);
     }
+  }
 
-    const DiscoverNFTCards = countSlice.map((elem, index) => (
-      <div key={index} className="col-12 col-sm-6 col-lg-4 col-xl-3">
-        <div className="nft-card card shadow-sm">
-          <div className="card-body">
-            <div className="img-wrap">
-              {/* Image */}
+  const DiscoverNFTCards = countSlice.map((elem, index) => (
+    <div key={index} className="col-12 col-sm-6 col-lg-4 col-xl-3">
+      <div className="nft-card card shadow-sm">
+        <div className="card-body">
+          <div className="img-wrap">
+            {/* Image */}
+            <img
+              src={`${process.env.PUBLIC_URL}/${elem.image}`}
+              alt={elem.title}
+            />
+
+            {/* Badge */}
+            <div
+              className={`badge bg-${elem.badgeInfo[0].color} position-absolute section-${elem.badgeInfo[0].visibility}`}
+            >
               <img
-                src={`${process.env.PUBLIC_URL}/${elem.image}`}
-                alt={elem.title}
+                src={`${process.env.PUBLIC_URL}/${elem.badgeInfo[0].icon}`}
+                alt=""
               />
-
-              {/* Badge */}
-              <div
-                className={`badge bg-${elem.badgeInfo[0].color} position-absolute section-${elem.badgeInfo[0].visibility}`}
-              >
-                <img
-                  src={`${process.env.PUBLIC_URL}/${elem.badgeInfo[0].icon}`}
-                  alt=""
-                />
-                {elem.badgeInfo[0].text}
-              </div>
+              {elem.badgeInfo[0].text}
             </div>
+          </div>
 
-            {/* Others Info */}
-            <div className="row gx-2 align-items-center mt-3">
-              <div className="col-8">
-                <span className="d-block fz-12">
-                  <i className={`bi ${elem.topLevelInfo[0].icon}`} />
-                  {elem.topLevelInfo[0].text}
-                </span>
-              </div>
-              <div className="col-4 text-end">
-                <button className="wishlist-btn" type="button">
-                  <i className="bi" />
-                </button>
-              </div>
+          {/* Others Info */}
+          <div className="row gx-2 align-items-center mt-3">
+            <div className="col-8">
+              <span className="d-block fz-12">
+                <i className={`bi ${elem.topLevelInfo[0].icon}`} />
+                {elem.topLevelInfo[0].text}
+              </span>
             </div>
-
-            {/* Meta Info */}
-            <div className="row gx-2 align-items-center mt-2">
-              <div className="col-8">
-                <div className="name-info d-flex align-items-center">
-                  <div className="author-img position-relative">
-                    <img
-                      className="shadow"
-                      src={`${process.env.PUBLIC_URL}/${elem.authorAvater}`}
-                      alt={elem.authorName}
-                    />
-                    <i
-                      className={`bi bi-check position-absolute bg-success ${elem.authorVerified}`}
-                    />
-                  </div>
-
-                  <div className="name-author">
-                    <OverlayTrigger
-                      placement="top"
-                      delay={{ show: 250, hide: 400 }}
-                      overlay={
-                        <Tooltip id={`discoverNFT${elem.id}`}>
-                          {elem.title}
-                        </Tooltip>
-                      }
-                    >
-                      <Link
-                        className="name d-block hover-primary text-truncate"
-                        to={`${process.env.PUBLIC_URL}/discover-items/${elem.id}`}
-                      >
-                        {elem.title}
-                      </Link>
-                    </OverlayTrigger>
-
-                    <Link
-                      className="author d-block fz-12 hover-primary text-truncate"
-                      to={`${process.env.PUBLIC_URL}/author/${elem.authorName}`}
-                    >
-                      @{elem.authorName}
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-4">
-                <div className="price text-end">
-                  <span className="fz-12 d-block">{elem.priceText}</span>
-                  <h6 className="mb-0">{elem.currentPrice}</h6>
-                </div>
-              </div>
+            <div className="col-4 text-end">
+              <button className="wishlist-btn" type="button">
+                <i className="bi" />
+              </button>
             </div>
+          </div>
 
-            {/* Button */}
-            <div className="row gx-2 align-items-center mt-3">
-              <div className="col-6">
-                <Link
-                  className={`btn btn-${elem.buttonGroup[0].leftButtonStyle} rounded-pill btn-sm`}
-                  to={elem.buttonGroup[0].leftButtonURL}
-                >
-                  <i className={`bi ${elem.buttonGroup[0].leftButtonIcon}`}></i>
-                  Withdraw
-                </Link>
-              </div>
-              <div className="col-6 text-end">
-                <Link
-                  className={`btn btn-danger rounded-pill btn-sm`}
-                  to={elem.buttonGroup[1].rightButtonURL}
-                >
+          {/* Meta Info */}
+          <div className="row gx-2 align-items-center mt-2">
+            <div className="col-8">
+              <div className="name-info d-flex align-items-center">
+                <div className="author-img position-relative">
+                  <img
+                    className="shadow"
+                    src={`${process.env.PUBLIC_URL}/${elem.authorAvater}`}
+                    alt={elem.authorName}
+                  />
                   <i
-                    className={`bi ${elem.buttonGroup[1].rightButtonIcon} me-1`}
-                  ></i>
-                  Stake
-                </Link>
+                    className={`bi bi-check position-absolute bg-success ${elem.authorVerified}`}
+                  />
+                </div>
+
+                <div className="name-author">
+                  <OverlayTrigger
+                    placement="top"
+                    delay={{ show: 250, hide: 400 }}
+                    overlay={
+                      <Tooltip id={`discoverNFT${elem.id}`}>
+                        {elem.title}
+                      </Tooltip>
+                    }
+                  >
+                    <Link
+                      className="name d-block hover-primary text-truncate"
+                      to={`${process.env.PUBLIC_URL}/discover-items/${elem.id}`}
+                    >
+                      {elem.title}
+                    </Link>
+                  </OverlayTrigger>
+
+                  <Link
+                    className="author d-block fz-12 hover-primary text-truncate"
+                    to={`${process.env.PUBLIC_URL}/author/${elem.authorName}`}
+                  >
+                    @{elem.authorName}
+                  </Link>
+                </div>
               </div>
+            </div>
+
+            <div className="col-4">
+              <div className="price text-end">
+                <span className="fz-12 d-block">{elem.priceText}</span>
+                <h6 className="mb-0">{elem.currentPrice}</h6>
+              </div>
+            </div>
+          </div>
+
+          {/* Button */}
+          <div className="row gx-2 align-items-center mt-3">
+            <div className="col-6">
+              <Link
+                className={`btn btn-${elem.buttonGroup[0].leftButtonStyle} rounded-pill btn-sm`}
+                to={elem.buttonGroup[0].leftButtonURL}
+              >
+                <i className={`bi ${elem.buttonGroup[0].leftButtonIcon}`}></i>
+                Withdraw
+              </Link>
+            </div>
+            <div className="col-6 text-end">
+              <Link
+                className={`btn btn-danger rounded-pill btn-sm`}
+                to={elem.buttonGroup[1].rightButtonURL}
+              >
+                <i
+                  className={`bi ${elem.buttonGroup[1].rightButtonIcon} me-1`}
+                ></i>
+                Stake
+              </Link>
             </div>
           </div>
         </div>
       </div>
-    ));
+    </div>
+  ));
 
-    return(
-        <>
-            <Header />
+  return (
+    <>
+      <Header />
 
-            <Breadcrumb 
-                breadcrumbTitle="Explore One" 
-                breadcrumbNav={[
-                    {
-                        navText: "Home",
-                        path: "/"
-                    }
-                ]}
-            />
+      <Breadcrumb
+        breadcrumbTitle="Explore One"
+        breadcrumbNav={[
+          {
+            navText: "Home",
+            path: "/"
+          }
+        ]}
+      />
 
-            <Divider />
+      <Divider />
 
-            <div className="explore-items-wrapper">
-                <div className="container">
+      <div className="explore-items-wrapper">
+        {/* <div className="container">
                     <div className="row g-4 align-items-end">
 
                         <div className="col-12 col-sm-6 col-lg-3">
@@ -282,42 +282,42 @@ const ExploreOne = () => {
                         </div>
 
                     </div>
-                </div>
+                </div> */}
 
-                <div className="w-100 mb-70 d-block" />
+        <div className="w-100 mb-70 d-block" />
 
-                <div className="container">
-                    <div className="row g-4 justify-content-center">
-                        {DiscoverNFTCards}
-                    </div>
-                </div>
+        <div className="container">
+          <div className="row g-4 justify-content-center">
+            {DiscoverNFTCards}
+          </div>
+        </div>
 
-                <div className="container">
-                    <div className="text-center mt-70">
-                        <button 
-                            className="btn btn-primary px-4 rounded-pill" 
-                            onClick={() => handleLoadMore()} 
-                            disabled={noMorePost ? "disabled" : null}
-                        >
-                            {noMorePost ? 
-                            (<span className="d-flex align-items-center">
-                                No Items Here
-                                <i className="ms-2 bi bi-emoji-frown" />
-                            </span>) : 
-                            (<span className="d-flex align-items-center">
-                                View More Items
-                                <i className="ms-2 bi bi-arrow-repeat" />
-                            </span>)}
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div className="container">
+          <div className="text-center mt-70">
+            <button
+              className="btn btn-primary px-4 rounded-pill"
+              onClick={() => handleLoadMore()}
+              disabled={noMorePost ? "disabled" : null}
+            >
+              {noMorePost ?
+                (<span className="d-flex align-items-center">
+                  No Items Here
+                  <i className="ms-2 bi bi-emoji-frown" />
+                </span>) :
+                (<span className="d-flex align-items-center">
+                  View More Items
+                  <i className="ms-2 bi bi-arrow-repeat" />
+                </span>)}
+            </button>
+          </div>
+        </div>
+      </div>
 
-            <Divider />
+      <Divider />
 
-            <Footer />
-        </>
-    )
+      <Footer />
+    </>
+  )
 }
 
 export default ExploreOne;

@@ -1,7 +1,71 @@
-import { useState } from "react";
-import './swap.css'
+import { useState, useEffect } from "react";
+import "./swap.css";
+import { ethers } from "ethers";
+import axios from "axios";
+import Web3Modal from "web3modal";
+import { nftAddress } from "../../blockchain/config";
+import NFTEE from "../../blockchain/artifacts/contracts/NFTEE.sol/NFTEE.json";
+const Swap = (props) => {
+  const { owner } = props.nftdata;
+  const [inputfrac, setInput1] = useState(0);
+  const [inputmatic, setInput2] = useState(0);
+  async function calculate() {
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+    let contract = new ethers.Contract(nftAddress, NFTEE.abi, signer);
+    const pooldata = await contract.pool_data(props.poolId);
+    const pool_const =
+      pooldata.nft_fractions *
+      ethers.utils.formatEther(pooldata.token_liq);
+    console.log("pool_const", pool_const);
+    
 
-const Swap = () => {
+    if (inputfrac > 0) {
+      // Swap TO MATIC from Fractions
+      var tokens =
+        ethers.utils.formatEther(pooldata.token_liq) -
+        (pool_const / pooldata.nft_fractions + inputfrac);
+      setInput2(tokens);
+    } else {
+      // Swap FROM MATIC to Fractions
+      var fractions =
+        pooldata.nft_fractions +
+        inputmatic -
+        (pool_const / ethers.utils.formatEther(pooldata.token_liq) +
+          inputmatic);
+      setInput1(fractions);
+    }
+  }
+
+  async function Swapfunction() {
+    console.log("poolId", props.poolId);
+    console.log(owner);
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+    let contract = new ethers.Contract(nftAddress, NFTEE.abi, signer);
+
+    if (inputfrac > 0) {
+      const swap1 = contract.swap(props.poolId, inputfrac, {
+        value: ethers.utils.parseEther("0"),
+      });
+    } else {
+      console.log("dbg log");
+      const ethDbg = ethers.utils.parseEther(inputmatic);
+      console.log("ethDbg ", ethDbg);
+      const swap1 = contract.swap(props.poolId, 0, {
+        value: ethDbg,
+      });
+    }
+    const pooldata = await contract.pool_data(props.poolId);
+    const token_liq_in_eth = ethers.utils.formatEther(pooldata.token_liq);
+    console.log("pooldata fractions", pooldata.nft_fractions);
+    console.log("token_liq_in_eth: ", token_liq_in_eth);
+  }
+
   return (
     <>
       <div class="section uniswapSection">
@@ -41,33 +105,95 @@ const Swap = () => {
             <div class="uniswapFields">
               <div class="uniswapField">
                 <div class="uniswapSelector">
-                  <img class="uniswapSelectorLogo" src="https://assets.coingecko.com/coins/images/4454/thumb/0xbtc.png?1561603765" />
+                  <img
+                    class="uniswapSelectorLogo"
+                    src="https://assets.coingecko.com/coins/images/4454/thumb/0xbtc.png?1561603765"
+                  />
                   <div class="uniswapSelectorText">0xFRN</div>
                   <div class="uniswapSelectorArrow">
-                    <svg width="12" height="7" viewBox="0 0 12 7" fill="none" xmlns="http://www.w3.org/2000/svg" class="sc-33m4yg-8 khlnVY"><path d="M0.97168 1L6.20532 6L11.439 1" stroke="#AEAEAE"></path></svg>
+                    <svg
+                      width="12"
+                      height="7"
+                      viewBox="0 0 12 7"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="sc-33m4yg-8 khlnVY"
+                    >
+                      <path
+                        d="M0.97168 1L6.20532 6L11.439 1"
+                        stroke="#AEAEAE"
+                      ></path>
+                    </svg>
                   </div>
                 </div>
-                <input class="uniswapTextInput" type="text" placeholder="0.0" />
+                <input
+                  class="uniswapTextInput"
+                  type="text"
+                  placeholder="0.0"
+                  onChange={(e) => {
+                    setInput1(e.target.value);
+                  }}
+                />
               </div>
               <div class="uniswapArrow">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E727D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#6E727D"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <polyline points="19 12 12 19 5 12"></polyline>
+                </svg>
               </div>
               <div class="uniswapField">
                 <div class="uniswapSelector">
-                  <img class="uniswapSelectorLogo" src="https://assets.coingecko.com/coins/images/11035/thumb/0xmnr.PNG?1587357680" />
+                  <img
+                    class="uniswapSelectorLogo"
+                    src="https://assets.coingecko.com/coins/images/11035/thumb/0xmnr.PNG?1587357680"
+                  />
                   <div class="uniswapSelectorText">0xMTC</div>
                   <div class="uniswapSelectorArrow">
-                    <svg width="12" height="7" viewBox="0 0 12 7" fill="none" xmlns="http://www.w3.org/2000/svg" class="sc-33m4yg-8 khlnVY"><path d="M0.97168 1L6.20532 6L11.439 1" stroke="#AEAEAE"></path></svg>
+                    <svg
+                      width="12"
+                      height="7"
+                      viewBox="0 0 12 7"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="sc-33m4yg-8 khlnVY"
+                    >
+                      <path
+                        d="M0.97168 1L6.20532 6L11.439 1"
+                        stroke="#AEAEAE"
+                      ></path>
+                    </svg>
                   </div>
                 </div>
-                <input class="uniswapTextInput" type="text" placeholder="0.0" />
+                <input
+                  class="uniswapTextInput"
+                  type="text"
+                  placeholder="0.0"
+                  onChange={(e) => {
+                    setInput2(e.target.value);
+                  }}
+                />
               </div>
             </div>
-            <button class="uniswapButton">Swap</button>
+            <button class="uniswapButton" onClick={calculate}>
+              Calculate
+            </button>
+            <button class="uniswapButton" onClick={Swapfunction}>
+              Swap
+            </button>
           </div>
         </div>
       </div>
     </>
-  )
+  );
 };
 export default Swap;

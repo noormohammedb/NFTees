@@ -9,6 +9,7 @@ const Swap = (props) => {
   const { owner } = props.nftdata;
   const [inputfrac, setInput1] = useState(0);
   const [inputmatic, setInput2] = useState(0);
+  const [whichfeild, setWhichfeild] = useState(0);
   async function calculate() {
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
@@ -16,26 +17,35 @@ const Swap = (props) => {
     const signer = provider.getSigner();
     let contract = new ethers.Contract(nftAddress, NFTEE.abi, signer);
     const pooldata = await contract.pool_data(props.poolId);
+    console.log(pooldata.nft_fractions.toNumber());
     const pool_const =
-      pooldata.nft_fractions *
-      ethers.utils.formatEther(pooldata.token_liq);
+      pooldata.nft_fractions.toNumber() *
+      Number(ethers.utils.formatEther(pooldata.token_liq));
     console.log("pool_const", pool_const);
-    
 
     if (inputfrac > 0) {
       // Swap TO MATIC from Fractions
       var tokens =
-        ethers.utils.formatEther(pooldata.token_liq) -
-        (pool_const / pooldata.nft_fractions + inputfrac);
+        Number(ethers.utils.formatEther(pooldata.token_liq)) -
+        pool_const / (pooldata.nft_fractions.toNumber() + Number(inputfrac));
       setInput2(tokens);
+      console.log("tokens", tokens);
     } else {
       // Swap FROM MATIC to Fractions
       var fractions =
-        pooldata.nft_fractions +
-        inputmatic -
-        (pool_const / ethers.utils.formatEther(pooldata.token_liq) +
-          inputmatic);
+        pooldata.nft_fractions.toNumber() -
+        pool_const /
+          (Number(ethers.utils.formatEther(pooldata.token_liq)) +
+            Number(inputmatic));
+      // console.log('pool_const: ', pool_const);
+      // console.log(
+      //   "ethers.utils.formatEther(pooldata.token_liq): ",
+      //    Number(ethers.utils.formatEther(pooldata.token_liq))
+      // );
+      // console.log('inputmatic: ', Number(inputmatic));
+      // console.log('pooldata.nft_fractions.toNumber(): ', pooldata.nft_fractions.toNumber());
       setInput1(fractions);
+      console.log("fractions", fractions);
     }
   }
 
@@ -48,11 +58,13 @@ const Swap = (props) => {
     const signer = provider.getSigner();
     let contract = new ethers.Contract(nftAddress, NFTEE.abi, signer);
 
-    if (inputfrac > 0) {
+    if (whichfeild == 1) {
+      console.log(whichfeild);
       const swap1 = contract.swap(props.poolId, inputfrac, {
         value: ethers.utils.parseEther("0"),
       });
     } else {
+      console.log(whichfeild);
       console.log("dbg log");
       const ethDbg = ethers.utils.parseEther(inputmatic);
       console.log("ethDbg ", ethDbg);
@@ -130,8 +142,10 @@ const Swap = (props) => {
                   class="uniswapTextInput"
                   type="text"
                   placeholder="0.0"
+                  value={inputfrac}
                   onChange={(e) => {
                     setInput1(e.target.value);
+                    setWhichfeild(1);
                   }}
                 />
               </div>
@@ -178,8 +192,10 @@ const Swap = (props) => {
                   class="uniswapTextInput"
                   type="text"
                   placeholder="0.0"
+                  value={inputmatic}
                   onChange={(e) => {
                     setInput2(e.target.value);
+                    setWhichfeild(0);
                   }}
                 />
               </div>

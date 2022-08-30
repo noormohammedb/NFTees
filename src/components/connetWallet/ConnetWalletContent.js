@@ -36,6 +36,7 @@ const ConnectWalletContent = () => {
             let bal = ethers.utils.formatEther(balance);
             setAccountAddress(accounts[0]);
             localStorage.setItem("wallet_address", accounts[0]);
+            console.log(accountAddress);
             setAccountBalance(bal);
             setIsConnected(true);
 
@@ -85,7 +86,7 @@ const ConnectWalletContent = () => {
                                         </span>
                                     </h4>
                                     <button className={`btn btn-sm btn-warning rounded-pill ms-auto`} onClick={connectWallet} >
-                                        {isConnected ? ("Connected") : ("Connect")}
+                                        {isConnected ? (`0x...${accountAddress.slice(35, 42)}`) : ("Connect")}
                                     </button>
                                 </div>
                             </div>
